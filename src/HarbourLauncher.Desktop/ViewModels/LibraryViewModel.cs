@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 using HarbourLauncher.Core;
+using HarbourLauncher.Core.SelfUpdate;
 
 namespace HarbourLauncher.Desktop.ViewModels;
 
@@ -13,7 +14,7 @@ public sealed class LibraryViewModel : ObservableObject
     private string summary = "Checking for updates…";
     private string? notice;
 
-    public LibraryViewModel(PortManager manager)
+    public LibraryViewModel(PortManager manager, SelfUpdater? updater = null)
     {
         this.manager = manager;
         games = manager.Catalog.Ports.Select(p => new GameViewModel(manager, p, Ui, OnGameChanged)).ToList();
@@ -32,6 +33,7 @@ public sealed class LibraryViewModel : ObservableObject
         Ui.OpenUninstall = Uninstall.Open;
         Restore = new RestoreViewModel(manager, Ui, id => games.Any(g => g.Port.Id == id && g.IsBusy), OnGamesAddedAsync);
         OpenSettingsCommand = new RelayCommand(Settings.Open);
+        AppUpdate = new AppUpdateViewModel(updater, Ui, () => IsAnyBusy);
         Regroup();
     }
 
@@ -58,6 +60,7 @@ public sealed class LibraryViewModel : ObservableObject
     public BackupViewModel Backup { get; }
     public RestoreViewModel Restore { get; }
     public UninstallViewModel Uninstall { get; }
+    public AppUpdateViewModel AppUpdate { get; }
     public ICommand ImportCommand { get; }
 
     /// <summary>Opens a .marinapack (import) or .marinabackup (restore), e.g. one passed on the command line or chosen in the picker.</summary>
@@ -104,11 +107,11 @@ public sealed class LibraryViewModel : ObservableObject
     public bool IsAnyBusy => games.Any(g => g.IsBusy) || Import.IsWorking || Share.IsWorking
                              || Backup.IsWorking || Restore.IsWorking || Uninstall.IsWorking;
 
-    /// <summary>On start: offer any games installed by hand, then check for updates.</summary>
+    /// <summary>On start: offer any games installed by hand, then check for updates (to the games and to Marina).</summary>
     public async Task StartAsync()
     {
         LookForExistingGames(includeDismissed: false);
-        await RefreshAsync();
+        await Task.WhenAll(RefreshAsync(), AppUpdate.CheckOnStartupAsync());
     }
 
     /// <summary>Shows the "found games" prompt if there is anything to add. Returns how many were found.</summary>

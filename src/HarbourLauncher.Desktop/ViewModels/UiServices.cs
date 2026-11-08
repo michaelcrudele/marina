@@ -24,6 +24,9 @@ public sealed class UiServices
     /// <summary>Opens the "share game" dialog for this game.</summary>
     public Action<GameViewModel>? OpenShare { get; set; }
 
+    /// <summary>Starts the newly installed Marina and closes this one.</summary>
+    public Action? RestartApp { get; set; }
+
     /// <summary>Shows a message across the top of the window.</summary>
     public Action<string>? ShowNotice { get; set; }
 }

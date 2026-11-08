@@ -12,6 +12,31 @@ Lighthouse and PaperBoat.
 The launcher never downloads or bundles game ROMs. Each port still asks the
 player for their own copy of the game, exactly as it does without the launcher.
 
+## Download
+
+1. Go to the [latest release](../../releases/latest) on this repo's
+   **Releases** page.
+2. Under **Assets**, download `Marina.exe`.
+3. Put `Marina.exe` in any folder you like (for example a `Marina` folder in
+   Documents) and double-click it. There's no installer, and you don't need to
+   install .NET; everything is inside the one file.
+
+Marina isn't code-signed, so the first time you run it Windows SmartScreen may
+say it "protected your PC". Click **More info**, then **Run anyway**.
+
+To check the download wasn't corrupted or tampered with, compare its hash with
+the `Marina.exe.sha256` file from the same release:
+
+```
+certutil -hashfile Marina.exe SHA256
+```
+
+Marina keeps itself up to date. When a new version comes out, it asks when it
+starts; click **Update and restart**. You can also check any time under
+**Settings > Marina updates**. The update is checked against its SHA-256 before
+it's installed, and your settings and games are stored separately, so nothing
+is lost.
+
 ## Layout
 
 ```
@@ -47,7 +72,8 @@ dotnet run --project src/HarbourLauncher.Cli -- launch soh
 
 Games install to `%LOCALAPPDATA%\Marina\ports\<id>` by default. To use
 another folder, open **Settings** (the gear in the app) or run
-`marina folder "Z:\Emulators\Harbour Masters"`. Each game gets its own
+`marina folder "<your games folder>"`, using whatever folder you want your
+games in (for example `marina folder "D:\Games\HarbourMasters"`). Each game gets its own
 subfolder there (`soh`, `2ship`, ...), and games already installed can move
 along with their saves and mods. The choice is saved in
 `%LOCALAPPDATA%\Marina\settings.json`. GitHub allows 60
@@ -157,37 +183,3 @@ For a release file players may edit, add it to that port's `keep` list in
 Add an entry to `Catalog/ports.json`. `windowsAsset` must match exactly one
 asset in each release; `CatalogTests.EachPatternPicksExactlyTheWindowsZipFromRealReleases`
 holds real asset names to check patterns against.
-
-## Making a release
-
-Builds happen on GitHub, not on your PC, so released files never contain local
-paths. Every push to `main` is built and tested automatically (see the
-**Actions** tab; each run has a downloadable `Marina.exe` under *Artifacts*).
-
-To publish a new version:
-
-1. On GitHub, open **Releases > Draft a new release**.
-2. Create a tag like `v1.2.3` (or `v1.2.3-beta`). The number becomes the app's version.
-3. Write the notes and click **Publish release**. Don't attach any files.
-
-A few minutes later, `Marina.exe` and `Marina.exe.sha256` appear on the release.
-If the build or tests fail, nothing is attached; check the **Actions** tab.
-
-## Version numbers
-
-The version shows in the bottom-right corner of the window (hover it to see the
-commit it was built from). It's `<base>.<commits>`, e.g. `0.1.42`:
-
-- The base (`0.1`) is `MarinaVersionBase` in `Directory.Build.props`. Change it
-  by hand for a bigger step, e.g. to `0.2` or `1.0`.
-- The last number is how many commits are on the branch, so it goes up by one
-  with every commit you push. GitHub's build gets it on its own.
-- Builds made on your own PC end in `-dev` (e.g. `0.1.42-dev`), so they're never
-  mistaken for one built by GitHub.
-- A published release uses its tag instead (`v1.2.3` shows as `1.2.3`).
-
-## Next steps
-
-- Restore a previous version from the backup
-- Nightly builds as a second channel
-- Self-update for the launcher

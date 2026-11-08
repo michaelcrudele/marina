@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
@@ -15,7 +16,9 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            var library = new LibraryViewModel(Services.CreateManager());
+            var (manager, updater) = Services.Create();
+            var library = new LibraryViewModel(manager, updater);
+            library.Ui.RestartApp = () => Restart(desktop);
             desktop.MainWindow = new MainWindow { DataContext = library };
             _ = StartAsync(library, desktop.Args ?? []);
         }
@@ -25,8 +28,24 @@ public partial class App : Application
     /// <summary>Starts the library, then opens a .marinapack if the launcher was started with one (e.g. "Open with").</summary>
     private static async Task StartAsync(LibraryViewModel library, string[] args)
     {
+        if (args.Contains(Program.AfterUpdateArg))
+            library.Notice = $"Marina was updated to v{AppInfo.Version}.";
         if (FindPack(args) is { } pack) library.OpenPack(pack);
         await library.StartAsync(); // Handles its own errors.
+    }
+
+    /// <summary>
+    /// Starts the Marina.exe that an update just put in place, then closes this one.
+    /// The new copy waits for this one to exit before it starts (see Program.Main).
+    /// </summary>
+    private static void Restart(IClassicDesktopStyleApplicationLifetime desktop)
+    {
+        if (Environment.ProcessPath is not { } exe) return;
+        var start = new ProcessStartInfo(exe) { UseShellExecute = false };
+        start.ArgumentList.Add(Program.AfterUpdateArg);
+        start.ArgumentList.Add(Environment.ProcessId.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        using (Process.Start(start)) { }
+        desktop.Shutdown();
     }
 
     private static string? FindPack(string[] args)

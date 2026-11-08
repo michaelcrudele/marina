@@ -25,6 +25,17 @@ public static class AppInfo
     /// <summary>What the footer shows, e.g. "Marina v0.1.42".</summary>
     public static string VersionText => $"Marina v{Version}";
 
+    /// <summary>The GitHub repository Marina's own releases come from.</summary>
+    public const string Repo = "michaelcrudele/marina";
+
+    /// <summary>
+    /// True for the single-file Marina.exe that releases ship. A build run from
+    /// its bin folder (e.g. with dotnet run) is an exe plus a pile of .dlls,
+    /// which swapping one file can't update.
+    /// </summary>
+    public static bool IsSingleFile => Environment.ProcessPath is not null
+        && !File.Exists(Path.Combine(AppContext.BaseDirectory, "Marina.dll"));
+
     /// <summary>Hover text for the footer.</summary>
     public static string VersionTip => Commit.Length > 0 ? $"Built from commit {Commit}" : "Version";
 }
