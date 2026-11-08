@@ -6,4 +6,15 @@
     <LangVersion>latest</LangVersion>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
+
+  <!-- Release builds are what get shared publicly. Strip anything that records
+       where on this computer the project was built (e.g. C:\Users\<name>\...). -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <!-- No .pdb files, and no PDB path written into the .exe/.dll. -->
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <!-- Same build, same bytes; replaces local source paths with /_/ as a backstop. -->
+    <Deterministic>true</Deterministic>
+    <PathMap>$(MSBuildThisFileDirectory)=/_/</PathMap>
+  </PropertyGroup>
 </Project>
