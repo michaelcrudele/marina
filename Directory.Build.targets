@@ -1,0 +1,23 @@
+<Project>
+  <!-- Sets the app version to <MarinaVersionBase>.<commit count>, e.g. 0.1.42.
+       Every commit pushed to GitHub raises the count, so each CI build gets the next number.
+       Builds made outside GitHub Actions get a "-dev" suffix (e.g. 0.1.42-dev) so a
+       locally built exe is never mistaken for an official one.
+       A release build passes -p:Version=<tag> instead, which skips all of this. -->
+  <Target Name="MarinaVersionFromGit" BeforeTargets="GetAssemblyVersion"
+          Condition="'$(Version)' == '$(VersionPrefix)'">
+    <Exec Command="git rev-list --count HEAD" WorkingDirectory="$(MSBuildThisFileDirectory)"
+          ConsoleToMSBuild="true" IgnoreExitCode="true" IgnoreStandardErrorWarningFormat="true"
+          EchoOff="true" StandardOutputImportance="low" StandardErrorImportance="low">
+      <Output TaskParameter="ConsoleOutput" PropertyName="_MarinaGitOutput" />
+      <Output TaskParameter="ExitCode" PropertyName="_MarinaGitExitCode" />
+    </Exec>
+
+    <PropertyGroup>
+      <_MarinaCommitCount>0</_MarinaCommitCount>
+      <_MarinaCommitCount Condition="'$(_MarinaGitExitCode)' == '0'">$(_MarinaGitOutput.Trim())</_MarinaCommitCount>
+      <Version>$(MarinaVersionBase).$(_MarinaCommitCount)</Version>
+      <Version Condition="'$(GITHUB_ACTIONS)' != 'true'">$(Version)-dev</Version>
+    </PropertyGroup>
+  </Target>
+</Project>

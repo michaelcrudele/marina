@@ -1,0 +1,57 @@
+# When you publish a release on GitHub, this builds Marina.exe from that release's
+# tag and attaches it (plus a SHA-256 checksum) to the release automatically.
+# Tag releases like v1.2.3 (or v1.2.3-beta); the number becomes the app's version.
+name: Release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write   # needed to attach files to the release
+
+jobs:
+  release:
+    runs-on: windows-latest
+    env:
+      TAG: ${{ github.event.release.tag_name }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.release.tag_name }}
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Read version from tag
+        shell: bash
+        run: |
+          version="${TAG#v}"
+          if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::Tag '$TAG' isn't a version like v1.2.3 or v1.2.3-beta."
+            exit 1
+          fi
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+
+      - name: Build
+        run: dotnet build HarbourLauncher.slnx -c Release
+
+      - name: Test
+        run: dotnet run --project tests/HarbourLauncher.Core.Tests -c Release --no-build
+
+      - name: Publish Marina.exe
+        run: >
+          dotnet publish src/HarbourLauncher.Desktop -c Release -r win-x64 --self-contained
+          -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
+          -p:Version=${{ env.VERSION }} -o publish
+
+      - name: Write checksum
+        shell: bash
+        working-directory: publish
+        run: sha256sum Marina.exe > Marina.exe.sha256
+
+      - name: Attach to the release
+        shell: bash
+        run: gh release upload "$TAG" publish/Marina.exe publish/Marina.exe.sha256 --clobber --repo "$GITHUB_REPOSITORY"

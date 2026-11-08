@@ -158,6 +158,34 @@ Add an entry to `Catalog/ports.json`. `windowsAsset` must match exactly one
 asset in each release; `CatalogTests.EachPatternPicksExactlyTheWindowsZipFromRealReleases`
 holds real asset names to check patterns against.
 
+## Making a release
+
+Builds happen on GitHub, not on your PC, so released files never contain local
+paths. Every push to `main` is built and tested automatically (see the
+**Actions** tab; each run has a downloadable `Marina.exe` under *Artifacts*).
+
+To publish a new version:
+
+1. On GitHub, open **Releases > Draft a new release**.
+2. Create a tag like `v1.2.3` (or `v1.2.3-beta`). The number becomes the app's version.
+3. Write the notes and click **Publish release**. Don't attach any files.
+
+A few minutes later, `Marina.exe` and `Marina.exe.sha256` appear on the release.
+If the build or tests fail, nothing is attached; check the **Actions** tab.
+
+## Version numbers
+
+The version shows in the bottom-right corner of the window (hover it to see the
+commit it was built from). It's `<base>.<commits>`, e.g. `0.1.42`:
+
+- The base (`0.1`) is `MarinaVersionBase` in `Directory.Build.props`. Change it
+  by hand for a bigger step, e.g. to `0.2` or `1.0`.
+- The last number is how many commits are on the branch, so it goes up by one
+  with every commit you push. GitHub's build gets it on its own.
+- Builds made on your own PC end in `-dev` (e.g. `0.1.42-dev`), so they're never
+  mistaken for one built by GitHub.
+- A published release uses its tag instead (`v1.2.3` shows as `1.2.3`).
+
 ## Next steps
 
 - Restore a previous version from the backup

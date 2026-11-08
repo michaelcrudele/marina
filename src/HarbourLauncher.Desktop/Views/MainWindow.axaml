@@ -1,6 +1,7 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:HarbourLauncher.Desktop.ViewModels"
+        xmlns:app="using:HarbourLauncher.Desktop"
         x:Class="HarbourLauncher.Desktop.Views.MainWindow"
         x:DataType="vm:LibraryViewModel"
         Title="Marina"
@@ -155,7 +156,7 @@
     </DataTemplate>
   </Window.DataTemplates>
 
-  <Grid RowDefinitions="32,Auto,Auto,*">
+  <Grid RowDefinitions="32,Auto,Auto,*,Auto">
     <!-- Title bar (draggable; the system draws the window buttons on the right) -->
     <TextBlock Grid.Row="0" Classes="muted" Text="Marina" FontSize="13"
                FontFamily="{StaticResource TitleFont}"
@@ -233,8 +234,14 @@
       </StackPanel>
     </ScrollViewer>
 
+    <!-- Footer: the app's version (goes up by one with every commit pushed to GitHub) -->
+    <TextBlock Grid.Row="4" Classes="muted" FontSize="11" HorizontalAlignment="Right"
+               Margin="48,2,24,8" Background="Transparent"
+               Text="{x:Static app:AppInfo.VersionText}"
+               ToolTip.Tip="{x:Static app:AppInfo.VersionTip}" />
+
     <!-- Settings (covers everything below the title bar so the window can still be dragged) -->
-    <Grid Grid.Row="1" Grid.RowSpan="3" IsVisible="{Binding Settings.IsOpen}" Background="#B3080A0D">
+    <Grid Grid.Row="1" Grid.RowSpan="4" IsVisible="{Binding Settings.IsOpen}" Background="#B3080A0D">
       <Border Background="{StaticResource CardBackground}" BorderBrush="{StaticResource CardBorder}"
               BorderThickness="1" CornerRadius="14" Padding="24,20,24,24" Margin="24"
               MaxWidth="600" HorizontalAlignment="Stretch" VerticalAlignment="Center">
@@ -338,7 +345,7 @@
     </Grid>
 
     <!-- Games found that the launcher didn't install -->
-    <Grid Grid.Row="1" Grid.RowSpan="3" IsVisible="{Binding Found.IsOpen}" Background="#B3080A0D">
+    <Grid Grid.Row="1" Grid.RowSpan="4" IsVisible="{Binding Found.IsOpen}" Background="#B3080A0D">
       <Border Background="{StaticResource CardBackground}" BorderBrush="{StaticResource CardBorder}"
               BorderThickness="1" CornerRadius="14" Padding="24,20,24,24" Margin="24"
               MaxWidth="600" HorizontalAlignment="Stretch" VerticalAlignment="Center">
@@ -384,7 +391,7 @@
     </Grid>
 
     <!-- Share a game: choose what goes in the .marinapack -->
-    <Grid Grid.Row="1" Grid.RowSpan="3" IsVisible="{Binding Share.IsOpen}" Background="#B3080A0D">
+    <Grid Grid.Row="1" Grid.RowSpan="4" IsVisible="{Binding Share.IsOpen}" Background="#B3080A0D">
       <Border Background="{StaticResource CardBackground}" BorderBrush="{StaticResource CardBorder}"
               BorderThickness="1" CornerRadius="14" Padding="24,20,24,24" Margin="24"
               MaxWidth="600" HorizontalAlignment="Stretch" VerticalAlignment="Center">
@@ -444,7 +451,7 @@
     </Grid>
 
     <!-- Back up a whole game to a .marinabackup -->
-    <Grid Grid.Row="1" Grid.RowSpan="3" IsVisible="{Binding Backup.IsOpen}" Background="#B3080A0D">
+    <Grid Grid.Row="1" Grid.RowSpan="4" IsVisible="{Binding Backup.IsOpen}" Background="#B3080A0D">
       <Border Background="{StaticResource CardBackground}" BorderBrush="{StaticResource CardBorder}"
               BorderThickness="1" CornerRadius="14" Padding="24,20,24,24" Margin="24"
               MaxWidth="560" HorizontalAlignment="Stretch" VerticalAlignment="Center">
@@ -493,7 +500,7 @@
     </Grid>
 
     <!-- Uninstall a game, optionally backing it up first -->
-    <Grid Grid.Row="1" Grid.RowSpan="3" IsVisible="{Binding Uninstall.IsOpen}" Background="#B3080A0D">
+    <Grid Grid.Row="1" Grid.RowSpan="4" IsVisible="{Binding Uninstall.IsOpen}" Background="#B3080A0D">
       <Border Background="{StaticResource CardBackground}" BorderBrush="{StaticResource CardBorder}"
               BorderThickness="1" CornerRadius="14" Padding="24,20,24,24" Margin="24"
               MaxWidth="540" HorizontalAlignment="Stretch" VerticalAlignment="Center">
@@ -537,7 +544,7 @@
     </Grid>
 
     <!-- Restore a .marinabackup -->
-    <Grid Grid.Row="1" Grid.RowSpan="3" IsVisible="{Binding Restore.IsOpen}" Background="#B3080A0D">
+    <Grid Grid.Row="1" Grid.RowSpan="4" IsVisible="{Binding Restore.IsOpen}" Background="#B3080A0D">
       <Border Background="{StaticResource CardBackground}" BorderBrush="{StaticResource CardBorder}"
               BorderThickness="1" CornerRadius="14" Padding="24,20,24,24" Margin="24"
               MaxWidth="560" HorizontalAlignment="Stretch" VerticalAlignment="Center">
@@ -571,7 +578,7 @@
     </Grid>
 
     <!-- Import a shared game (.marinapack) -->
-    <Grid Grid.Row="1" Grid.RowSpan="3" IsVisible="{Binding Import.IsOpen}" Background="#B3080A0D">
+    <Grid Grid.Row="1" Grid.RowSpan="4" IsVisible="{Binding Import.IsOpen}" Background="#B3080A0D">
       <Border Background="{StaticResource CardBackground}" BorderBrush="{StaticResource CardBorder}"
               BorderThickness="1" CornerRadius="14" Padding="24,20,24,24" Margin="24"
               MaxWidth="560" HorizontalAlignment="Stretch" VerticalAlignment="Center">
