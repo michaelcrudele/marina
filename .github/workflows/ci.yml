@@ -1,7 +1,7 @@
 # Builds and tests every push to main and every pull request.
-# The finished Marina.exe is attached to each run as a download (under "Artifacts"),
-# so you can try a build without making a release.
-name: Build and test
+# Every push to main also publishes a GitHub release (v<base>.<commit count>)
+# with Marina.exe attached. Pull requests are only built and tested.
+name: Build and release
 
 on:
   push:
@@ -10,11 +10,13 @@ on:
   workflow_dispatch:   # adds a "Run workflow" button on the Actions tab
 
 permissions:
-  contents: read
+  contents: write   # needed to create releases
 
 jobs:
   build:
     runs-on: windows-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -24,8 +26,14 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
+      - name: Work out version
+        shell: bash
+        run: |
+          base=$(sed -n 's:.*<MarinaVersionBase>\(.*\)</MarinaVersionBase>.*:\1:p' Directory.Build.props)
+          echo "VERSION=$base.$(git rev-list --count HEAD)" >> "$GITHUB_ENV"
+
       - name: Build
-        run: dotnet build HarbourLauncher.slnx -c Release
+        run: dotnet build HarbourLauncher.slnx -c Release -p:Version=${{ env.VERSION }}
 
       - name: Test
         run: dotnet run --project tests/HarbourLauncher.Core.Tests -c Release --no-build
@@ -33,10 +41,23 @@ jobs:
       - name: Publish Marina.exe
         run: >
           dotnet publish src/HarbourLauncher.Desktop -c Release -r win-x64 --self-contained
-          -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish
+          -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
+          -p:Version=${{ env.VERSION }} -o publish
+
+      - name: Write checksum
+        shell: bash
+        working-directory: publish
+        run: sha256sum Marina.exe > Marina.exe.sha256
 
       - uses: actions/upload-artifact@v4
         with:
-          name: Marina-${{ github.sha }}
+          name: Marina-${{ env.VERSION }}
           path: publish/Marina.exe
           retention-days: 14
+
+      - name: Create release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        shell: bash
+        run: >
+          gh release create "v$VERSION" publish/Marina.exe publish/Marina.exe.sha256
+          --title "Marina v$VERSION" --generate-notes --target "$GITHUB_SHA"
