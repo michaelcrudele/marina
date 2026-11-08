@@ -1,0 +1,613 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:HarbourLauncher.Desktop.ViewModels"
+        x:Class="HarbourLauncher.Desktop.Views.MainWindow"
+        x:DataType="vm:LibraryViewModel"
+        Title="Marina"
+        Icon="/Assets/marina.ico"
+        Width="1080" Height="720" MinWidth="720" MinHeight="520"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource WindowBackground}"
+        Foreground="{StaticResource TextPrimary}"
+        FontFamily="{StaticResource BodyFont}"
+        ExtendClientAreaToDecorationsHint="True">
+
+  <Window.Resources>
+    <StreamGeometry x:Key="RefreshIcon">M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z</StreamGeometry>
+    <StreamGeometry x:Key="FolderIcon">M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z</StreamGeometry>
+    <StreamGeometry x:Key="PlayIcon">M8,5.14V19.14L19,12.14L8,5.14Z</StreamGeometry>
+    <StreamGeometry x:Key="SettingsIcon">M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.21,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.21,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.67 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z</StreamGeometry>
+    <StreamGeometry x:Key="ImportIcon">M2,12H4V17H20V12H22V17A2,2 0 0,1 20,19H4A2,2 0 0,1 2,17V12M12,15L17.55,9.54L16.13,8.13L13,11.25V2H11V11.25L7.88,8.13L6.46,9.55L12,15Z</StreamGeometry>
+    <StreamGeometry x:Key="CloseIcon">M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z</StreamGeometry>
+  </Window.Resources>
+
+  <Window.DataTemplates>
+    <!-- One game card, portrait like a game case (2:3 artwork). Used by both the Installed and Available lists. -->
+    <DataTemplate DataType="vm:GameViewModel">
+      <Border Classes="card" Width="208" Margin="0,0,16,18" Cursor="Hand">
+        <Border.ContextMenu>
+          <ContextMenu>
+            <MenuItem Header="Choose artwork…" Command="{Binding ChooseArtworkCommand}" />
+            <MenuItem Header="Crop artwork to fill the card" Command="{Binding CropArtworkCommand}" IsVisible="{Binding CanCropArtwork}" />
+            <MenuItem Header="Show the whole artwork" Command="{Binding ShowWholeArtworkCommand}" IsVisible="{Binding CanShowWholeArtwork}" />
+            <MenuItem Header="Remove artwork" Command="{Binding RemoveArtworkCommand}" IsVisible="{Binding HasArtwork}" />
+            <MenuItem Header="Open install folder" Command="{Binding OpenFolderCommand}" IsVisible="{Binding IsInstalled}" />
+            <MenuItem Header="Back up…" Command="{Binding BackupCommand}" IsVisible="{Binding IsInstalled}"
+                      ToolTip.Tip="Save the whole game to a .marinabackup file, e.g. on a USB drive, to restore on another of your PCs" />
+            <MenuItem Header="Share game…" Command="{Binding ShareCommand}" IsVisible="{Binding IsInstalled}"
+                      ToolTip.Tip="Save the game with your saves, settings, mods and artwork as a .marinapack file" />
+            <Separator IsVisible="{Binding IsInstalled}" />
+            <MenuItem Classes="danger" Header="Uninstall…" Command="{Binding UninstallCommand}" IsVisible="{Binding IsInstalled}" />
+          </ContextMenu>
+        </Border.ContextMenu>
+        <Border Classes="cardClip">
+        <StackPanel>
+          <!-- Artwork: 208 x 312 -->
+          <Border Height="312" Background="{Binding Banner}" CornerRadius="12,12,0,0" ClipToBounds="True">
+            <Grid>
+              <!-- Portrait box art (or art the player chose to crop) fills the whole area. -->
+              <Image Source="{Binding Artwork}" IsVisible="{Binding ArtworkFills}" Stretch="UniformToFill"
+                     HorizontalAlignment="Center" VerticalAlignment="Center" />
+
+              <!-- Other art: a blurred, enlarged copy fills the area, with the whole image edge to edge on top. -->
+              <Image Source="{Binding Artwork}" IsVisible="{Binding ArtworkFits}" Stretch="UniformToFill"
+                     RenderTransformOrigin="50%,50%">
+                <Image.RenderTransform>
+                  <ScaleTransform ScaleX="1.3" ScaleY="1.3" />
+                </Image.RenderTransform>
+                <Image.Effect>
+                  <BlurEffect Radius="36" />
+                </Image.Effect>
+              </Image>
+              <Border IsVisible="{Binding ArtworkFits}" Background="#47000000" />
+              <Image Source="{Binding Artwork}" IsVisible="{Binding ArtworkFits}" Stretch="Uniform"
+                     VerticalAlignment="Center">
+                <Image.Effect>
+                  <DropShadowEffect BlurRadius="28" OffsetX="0" OffsetY="8" Opacity="0.6" Color="Black" />
+                </Image.Effect>
+              </Image>
+
+              <!-- Artwork melts into the card body instead of ending at a hard edge. -->
+              <Border IsVisible="{Binding HasArtwork}" Height="72" VerticalAlignment="Bottom">
+                <Border.Background>
+                  <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
+                    <GradientStop Offset="0" Color="#00171E27" />
+                    <GradientStop Offset="1" Color="#FF171E27" />
+                  </LinearGradientBrush>
+                </Border.Background>
+              </Border>
+              <StackPanel IsVisible="{Binding ShowBadge}" VerticalAlignment="Center" Spacing="6">
+                <TextBlock Text="{Binding Badge}" FontSize="52" FontFamily="{StaticResource TitleFont}"
+                           Foreground="White" Opacity="0.92" HorizontalAlignment="Center" />
+                <TextBlock Text="{Binding Game}" FontSize="12" Foreground="White" Opacity="0.75"
+                           HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" Margin="16,0" />
+              </StackPanel>
+              <Border Classes="pill" IsVisible="{Binding HasStatusBadge}"
+                      HorizontalAlignment="Right" VerticalAlignment="Top" Margin="8">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                  <Ellipse Width="7" Height="7" VerticalAlignment="Center"
+                           Fill="{StaticResource SuccessBrush}" IsVisible="{Binding !StatusIsUpdate}" />
+                  <Ellipse Width="7" Height="7" VerticalAlignment="Center"
+                           Fill="{StaticResource UpdateBrush}" IsVisible="{Binding StatusIsUpdate}" />
+                  <TextBlock Text="{Binding StatusBadge}" FontSize="11" FontWeight="SemiBold" />
+                </StackPanel>
+              </Border>
+            </Grid>
+          </Border>
+
+          <!-- Details -->
+          <StackPanel Margin="12,10,12,12" Spacing="1">
+            <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="SemiBold"
+                       TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Name}" />
+            <TextBlock Classes="muted" Text="{Binding Game}" FontSize="11"
+                       TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Game}" />
+            <TextBlock Classes="muted" Text="{Binding VersionText}" FontSize="11" Margin="0,4,0,0"
+                       TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding VersionText}" />
+            <TextBlock Classes="muted" Text="{Binding LastPlayedText}" FontSize="11"
+                       TextTrimming="CharacterEllipsis" IsVisible="{Binding IsInstalled}" />
+            <TextBlock Classes="muted" Text="{Binding OfflineText}" IsVisible="{Binding HasOfflineText}"
+                       FontSize="11" FontStyle="Italic" TextWrapping="Wrap" />
+
+            <!-- Progress while installing or updating -->
+            <StackPanel IsVisible="{Binding IsBusy}" Spacing="6" Margin="0,10,0,0">
+              <ProgressBar Minimum="0" Maximum="100"
+                           Value="{Binding Progress}" IsIndeterminate="{Binding IsIndeterminate}" />
+              <TextBlock Classes="muted" Text="{Binding BusyText}" FontSize="11" TextWrapping="Wrap" />
+            </StackPanel>
+
+            <!-- Error -->
+            <Border IsVisible="{Binding HasError}" Background="{StaticResource ErrorBackground}"
+                    CornerRadius="8" Padding="8,6,2,6" Margin="0,10,0,0">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Text="{Binding Error}" Foreground="{StaticResource ErrorText}"
+                           FontSize="11" TextWrapping="Wrap" VerticalAlignment="Center" />
+                <Button Grid.Column="1" Classes="subtle" Padding="5" VerticalAlignment="Top"
+                        Command="{Binding DismissErrorCommand}" ToolTip.Tip="Dismiss">
+                  <PathIcon Data="{StaticResource CloseIcon}" Width="9" Height="9"
+                            Foreground="{StaticResource ErrorText}" />
+                </Button>
+              </Grid>
+            </Border>
+
+            <!-- Actions: the main button stretches; Update and the folder button sit beside it. -->
+            <Grid ColumnDefinitions="*,Auto,Auto" Margin="0,10,0,0" IsVisible="{Binding ShowActions}">
+              <Button Classes="primary compact" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                      Command="{Binding PlayCommand}" IsVisible="{Binding ShowPlay}">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                  <PathIcon Data="{StaticResource PlayIcon}" Width="11" Height="11" />
+                  <TextBlock Text="Play" />
+                </StackPanel>
+              </Button>
+              <Button Classes="primary compact" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                      Content="Install" Command="{Binding InstallCommand}" IsVisible="{Binding ShowInstall}" />
+              <Button Grid.Column="1" Classes="update compact" Content="Update" Margin="6,0,0,0"
+                      Command="{Binding InstallCommand}" IsVisible="{Binding ShowUpdate}" />
+              <Button Grid.Column="2" Classes="subtle" Padding="8,6" Margin="4,0,0,0"
+                      Command="{Binding OpenFolderCommand}" IsVisible="{Binding IsInstalled}"
+                      ToolTip.Tip="Open install folder">
+                <PathIcon Data="{StaticResource FolderIcon}" Width="15" Height="15" />
+              </Button>
+            </Grid>
+          </StackPanel>
+        </StackPanel>
+        </Border>
+      </Border>
+    </DataTemplate>
+  </Window.DataTemplates>
+
+  <Grid RowDefinitions="32,Auto,Auto,*">
+    <!-- Title bar (draggable; the system draws the window buttons on the right) -->
+    <TextBlock Grid.Row="0" Classes="muted" Text="Marina" FontSize="13"
+               FontFamily="{StaticResource TitleFont}"
+               VerticalAlignment="Center" Margin="16,0" IsHitTestVisible="False" />
+
+    <!-- Header -->
+    <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Margin="48,8,48,4">
+      <StackPanel>
+        <TextBlock Classes="title" Text="LIBRARY" FontSize="32" />
+        <TextBlock Classes="muted" Text="{Binding Summary}" Margin="0,4,0,0" />
+      </StackPanel>
+      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+        <Button Command="{Binding RefreshCommand}" IsEnabled="{Binding CanRefresh}">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <PathIcon Data="{StaticResource RefreshIcon}" Width="14" Height="14" />
+            <TextBlock Text="Check for updates" />
+          </StackPanel>
+        </Button>
+        <Button Command="{Binding ImportCommand}" ToolTip.Tip="Import a shared game (.marinapack) or restore a backup (.marinabackup)" Padding="10,8">
+          <PathIcon Data="{StaticResource ImportIcon}" Width="16" Height="16" />
+        </Button>
+        <Button Command="{Binding OpenSettingsCommand}" ToolTip.Tip="Settings" Padding="10,8">
+          <PathIcon Data="{StaticResource SettingsIcon}" Width="16" Height="16" />
+        </Button>
+      </StackPanel>
+    </Grid>
+
+    <!-- Notice -->
+    <Border Grid.Row="2" IsVisible="{Binding HasNotice}" Background="{StaticResource NoticeBackground}"
+            CornerRadius="8" Padding="14,10,6,10" Margin="48,12,48,0">
+      <Grid ColumnDefinitions="*,Auto">
+        <TextBlock Text="{Binding Notice}" TextWrapping="Wrap" VerticalAlignment="Center" />
+        <Button Grid.Column="1" Classes="subtle" Padding="6" Command="{Binding DismissNoticeCommand}"
+                ToolTip.Tip="Dismiss">
+          <PathIcon Data="{StaticResource CloseIcon}" Width="10" Height="10" />
+        </Button>
+      </Grid>
+    </Border>
+
+    <!-- Library -->
+    <ScrollViewer Grid.Row="3" Margin="0,8,0,0">
+      <!-- Wide margins leave room for a hovered card to grow (8%) and cast its shadow
+           without being cut off at the edges of the scrolling area. -->
+      <StackPanel Margin="48,8,32,56">
+        <TextBlock Classes="section" Text="INSTALLED" />
+        <Border IsVisible="{Binding HasNoInstalled}" Background="{StaticResource CardBackground}"
+                BorderBrush="{StaticResource CardBorder}" BorderThickness="1"
+                CornerRadius="12" Padding="20" Margin="0,4,16,16">
+          <TextBlock Classes="muted" TextWrapping="Wrap"
+                     Text="No games installed yet. Choose one below and it will be downloaded from GitHub and set up for you." />
+        </Border>
+        <!-- Padding gives a growing card room inside the list itself, even if something still clips;
+             the negative side margins keep the cards lined up with the header. -->
+        <ItemsControl Classes="games" ItemsSource="{Binding Installed}" IsVisible="{Binding HasInstalled}"
+                      Margin="-24,0,-24,0" Padding="24,24,24,12">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <WrapPanel />
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+        </ItemsControl>
+
+        <TextBlock Classes="section" Text="AVAILABLE TO INSTALL" IsVisible="{Binding HasAvailable}" />
+        <ItemsControl Classes="games" ItemsSource="{Binding Available}" IsVisible="{Binding HasAvailable}"
+                      Margin="-24,0,-24,0" Padding="24,24,24,12">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <WrapPanel />
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+        </ItemsControl>
+
+        <TextBlock Classes="muted" FontSize="11" Margin="0,8,16,0" TextWrapping="Wrap"
+                   Text="Marina never downloads game ROMs. Each game asks for your own copy the first time it starts." />
+      </StackPanel>
+    </ScrollViewer>
+
+    <!-- Settings (covers everything below the title bar so the window can still be dragged) -->
+    <Grid Grid.Row="1" Grid.RowSpan="3" IsVisible="{Binding Settings.IsOpen}" Background="#B3080A0D">
+      <Border Background="{StaticResource CardBackground}" BorderBrush="{StaticResource CardBorder}"
+              BorderThickness="1" CornerRadius="14" Padding="24,20,24,24" Margin="24"
+              MaxWidth="600" HorizontalAlignment="Stretch" VerticalAlignment="Center">
+        <Grid RowDefinitions="Auto,*,Auto">
+          <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,12">
+            <TextBlock Classes="title" Text="SETTINGS" FontSize="24" VerticalAlignment="Center" />
+            <Button Grid.Column="1" Classes="subtle" Padding="8" Command="{Binding Settings.CancelCommand}"
+                    IsEnabled="{Binding Settings.CanEdit}" ToolTip.Tip="Close">
+              <PathIcon Data="{StaticResource CloseIcon}" Width="12" Height="12" />
+            </Button>
+          </Grid>
+          <ScrollViewer Grid.Row="1">
+            <StackPanel Spacing="4" Margin="0,0,14,0">
+
+              <TextBlock Text="Games folder" FontWeight="SemiBold" />
+              <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap" Margin="0,0,0,8"
+                         Text="Where games are installed, and where the launcher looks for the ones you have." />
+
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBox Text="{Binding Settings.Folder}" IsEnabled="{Binding Settings.CanEdit}"
+                         Watermark="{Binding Settings.DefaultFolder}" VerticalContentAlignment="Center" />
+                <Button Grid.Column="1" Margin="8,0,0,0" Content="Browse…" Click="OnBrowseClick"
+                        IsEnabled="{Binding Settings.CanEdit}" />
+              </Grid>
+
+              <Grid ColumnDefinitions="*,Auto" Margin="0,4,0,0">
+                <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap" VerticalAlignment="Center"
+                           Text="{Binding Settings.ExampleText}" />
+                <Button Grid.Column="1" Classes="subtle" FontSize="12" Padding="8,4"
+                        Content="Use default folder" Command="{Binding Settings.UseDefaultCommand}"
+                        IsEnabled="{Binding Settings.CanEdit}" ToolTip.Tip="{Binding Settings.DefaultFolder}" />
+              </Grid>
+
+              <CheckBox Margin="0,8,0,0" IsVisible="{Binding Settings.ShowMoveOption}"
+                        IsChecked="{Binding Settings.MoveInstalled}" IsEnabled="{Binding Settings.CanEdit}">
+                <TextBlock Text="{Binding Settings.MoveOptionText}" TextWrapping="Wrap" />
+              </CheckBox>
+
+              <TextBlock Text="Games you installed yourself" FontWeight="SemiBold" Margin="0,20,0,0" />
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap" VerticalAlignment="Center" Margin="0,0,12,0"
+                           Text="Find games already in the games folder that weren't installed by the launcher, and add them to your library." />
+                <Button Grid.Column="1" Content="Look for games" Command="{Binding Settings.LookForGamesCommand}"
+                        IsEnabled="{Binding Settings.CanLookForGames}"
+                        ToolTip.Tip="Save a new folder first, then look for games in it." />
+              </Grid>
+
+              <TextBlock Text="Game artwork" FontWeight="SemiBold" Margin="0,20,0,0" />
+              <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap" Margin="0,0,0,8"
+                         Text="Use your own icon or box art on a game's card (PNG, JPEG, BMP or WebP). Changes apply right away. You can also right-click a game's card." />
+              <ItemsControl ItemsSource="{Binding AllGames}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate DataType="vm:GameViewModel">
+                    <Border Background="{StaticResource RaisedBackground}" CornerRadius="10" Padding="8" Margin="0,0,0,6">
+                      <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                        <Border Width="40" Height="60" CornerRadius="5" Background="{Binding Banner}" ClipToBounds="True">
+                          <Grid>
+                            <Image Source="{Binding Artwork}" IsVisible="{Binding ArtworkFills}" Stretch="UniformToFill" />
+                            <Image Source="{Binding Artwork}" IsVisible="{Binding ArtworkFits}" Stretch="Uniform" Margin="3" />
+                            <TextBlock Text="{Binding Badge}" IsVisible="{Binding ShowBadge}" FontSize="12"
+                                       FontFamily="{StaticResource TitleFont}" Foreground="White"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                          </Grid>
+                        </Border>
+                        <StackPanel Grid.Column="1" Margin="12,0" VerticalAlignment="Center">
+                          <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                          <TextBlock Classes="muted" FontSize="11" Text="{Binding ArtworkStatus}" />
+                          <TextBlock FontSize="11" Foreground="{StaticResource ErrorText}" TextWrapping="Wrap"
+                                     Text="{Binding Error}" IsVisible="{Binding HasError}" />
+                        </StackPanel>
+                        <Button Grid.Column="2" Content="Choose…" VerticalAlignment="Center"
+                                Command="{Binding ChooseArtworkCommand}" />
+                        <Button Grid.Column="3" Classes="subtle" Content="Reset" Margin="4,0,0,0" VerticalAlignment="Center"
+                                Command="{Binding RemoveArtworkCommand}" IsVisible="{Binding HasArtwork}"
+                                ToolTip.Tip="Go back to the default banner" />
+                      </Grid>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </ScrollViewer>
+
+          <StackPanel Grid.Row="2" Spacing="4">
+            <ProgressBar IsIndeterminate="True" IsVisible="{Binding Settings.IsSaving}" Margin="0,12,0,0" />
+
+            <Border IsVisible="{Binding Settings.HasError}" Background="{StaticResource ErrorBackground}"
+                    CornerRadius="8" Padding="10,8" Margin="0,12,0,0">
+              <TextBlock Text="{Binding Settings.Error}" Foreground="{StaticResource ErrorText}"
+                         FontSize="12" TextWrapping="Wrap" />
+            </Border>
+
+            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="0,20,0,0">
+              <Button Content="Cancel" Command="{Binding Settings.CancelCommand}" IsEnabled="{Binding Settings.CanEdit}" />
+              <Button Classes="primary" Content="{Binding Settings.SaveLabel}" Command="{Binding Settings.SaveCommand}"
+                      IsEnabled="{Binding Settings.CanEdit}" />
+            </StackPanel>
+          </StackPanel>
+        </Grid>
+      </Border>
+    </Grid>
+
+    <!-- Games found that the launcher didn't install -->
+    <Grid Grid.Row="1" Grid.RowSpan="3" IsVisible="{Binding Found.IsOpen}" Background="#B3080A0D">
+      <Border Background="{StaticResource CardBackground}" BorderBrush="{StaticResource CardBorder}"
+              BorderThickness="1" CornerRadius="14" Padding="24,20,24,24" Margin="24"
+              MaxWidth="600" HorizontalAlignment="Stretch" VerticalAlignment="Center">
+        <StackPanel Spacing="4">
+          <TextBlock Classes="title" Text="{Binding Found.Title}" FontSize="22" TextWrapping="Wrap" />
+          <TextBlock Classes="muted" FontSize="13" TextWrapping="Wrap" Margin="0,4,0,12"
+                     Text="{Binding Found.Intro}" />
+
+          <ScrollViewer MaxHeight="320">
+            <ItemsControl ItemsSource="{Binding Found.Items}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="vm:FoundGameItem">
+                  <Border Background="{StaticResource RaisedBackground}" CornerRadius="10" Padding="12,10" Margin="0,0,0,8">
+                    <CheckBox IsChecked="{Binding IsSelected}">
+                      <StackPanel Spacing="2" Margin="4,0,0,0">
+                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+                        <TextBlock Classes="muted" FontSize="12" Text="{Binding Detail}" TextWrapping="Wrap" />
+                        <TextBlock FontSize="12" Foreground="{StaticResource UpdateBrush}" TextWrapping="Wrap"
+                                   Text="{Binding RenameNote}" IsVisible="{Binding NeedsRename}" />
+                      </StackPanel>
+                    </CheckBox>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </ScrollViewer>
+
+          <Border IsVisible="{Binding Found.HasError}" Background="{StaticResource ErrorBackground}"
+                  CornerRadius="8" Padding="10,8" Margin="0,8,0,0">
+            <TextBlock Text="{Binding Found.Error}" Foreground="{StaticResource ErrorText}"
+                       FontSize="12" TextWrapping="Wrap" />
+          </Border>
+
+          <TextBlock Classes="muted" FontSize="11" TextWrapping="Wrap" Margin="0,8,0,0"
+                     Text="Their version shows as unknown until the first update. Not now? You can look again any time in Settings." />
+
+          <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button Content="Not now" Command="{Binding Found.NotNowCommand}" />
+            <Button Classes="primary" Content="Add to library" Command="{Binding Found.AddCommand}" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+    </Grid>
+
+    <!-- Share a game: choose what goes in the .marinapack -->
+    <Grid Grid.Row="1" Grid.RowSpan="3" IsVisible="{Binding Share.IsOpen}" Background="#B3080A0D">
+      <Border Background="{StaticResource CardBackground}" BorderBrush="{StaticResource CardBorder}"
+              BorderThickness="1" CornerRadius="14" Padding="24,20,24,24" Margin="24"
+              MaxWidth="600" HorizontalAlignment="Stretch" VerticalAlignment="Center">
+        <Grid RowDefinitions="Auto,*,Auto">
+          <StackPanel Spacing="4" Margin="0,0,0,12">
+            <TextBlock Classes="title" Text="{Binding Share.Title}" FontSize="22" TextWrapping="Wrap" />
+            <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap"
+                       Text="Choose what goes in the .marinapack file. Someone with Marina can import it on their PC." />
+          </StackPanel>
+
+          <ScrollViewer Grid.Row="1">
+            <ItemsControl ItemsSource="{Binding Share.Items}" Margin="0,0,12,0">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="vm:ShareItemViewModel">
+                  <Border Background="{StaticResource RaisedBackground}" CornerRadius="10" Padding="12,8" Margin="0,0,0,6">
+                    <Grid ColumnDefinitions="*,Auto">
+                      <CheckBox IsChecked="{Binding IsSelected}" IsEnabled="{Binding CanEdit}">
+                        <StackPanel Margin="4,0,0,0">
+                          <TextBlock Text="{Binding Label}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                          <TextBlock Classes="muted" FontSize="11" Text="{Binding Detail}" TextWrapping="Wrap" />
+                        </StackPanel>
+                      </CheckBox>
+                      <TextBlock Grid.Column="1" Text="{Binding SizeText}" VerticalAlignment="Center"
+                                 FontWeight="SemiBold" Margin="12,0,0,0" />
+                    </Grid>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </ScrollViewer>
+
+          <StackPanel Grid.Row="2" Spacing="6" Margin="0,8,0,0">
+            <TextBlock Text="{Binding Share.TotalText}" FontWeight="SemiBold" FontSize="15" />
+            <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap"
+                       Text="{Binding Share.ChoiceNote}" IsVisible="{Binding Share.HasChoiceNote}" />
+            <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap" Text="{Binding Share.NeverIncludedText}" />
+
+            <StackPanel IsVisible="{Binding Share.IsWorking}" Spacing="6" Margin="0,6,0,0">
+              <ProgressBar Minimum="0" Maximum="100" Value="{Binding Share.Progress}" />
+              <TextBlock Classes="muted" FontSize="12" Text="{Binding Share.ProgressText}" />
+            </StackPanel>
+
+            <Border IsVisible="{Binding Share.HasError}" Background="{StaticResource ErrorBackground}"
+                    CornerRadius="8" Padding="10,8" Margin="0,6,0,0">
+              <TextBlock Text="{Binding Share.Error}" Foreground="{StaticResource ErrorText}"
+                         FontSize="12" TextWrapping="Wrap" />
+            </Border>
+
+            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="0,10,0,0">
+              <Button Content="{Binding Share.CancelLabel}" Command="{Binding Share.CancelCommand}" />
+              <Button Classes="primary" Content="Save pack…" Command="{Binding Share.SaveCommand}"
+                      IsEnabled="{Binding Share.CanSave}" />
+            </StackPanel>
+          </StackPanel>
+        </Grid>
+      </Border>
+    </Grid>
+
+    <!-- Back up a whole game to a .marinabackup -->
+    <Grid Grid.Row="1" Grid.RowSpan="3" IsVisible="{Binding Backup.IsOpen}" Background="#B3080A0D">
+      <Border Background="{StaticResource CardBackground}" BorderBrush="{StaticResource CardBorder}"
+              BorderThickness="1" CornerRadius="14" Padding="24,20,24,24" Margin="24"
+              MaxWidth="560" HorizontalAlignment="Stretch" VerticalAlignment="Center">
+        <StackPanel Spacing="6">
+          <TextBlock Classes="title" Text="{Binding Backup.Title}" FontSize="22" TextWrapping="Wrap" />
+          <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap"
+                     Text="Saves the whole game to one .marinabackup file. Save it to a USB drive (or a synced folder) and restore it on your other PC with the import button." />
+
+          <ItemsControl ItemsSource="{Binding Backup.Parts}" Margin="0,8,0,0">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate DataType="vm:BackupPartRow">
+                <Border Background="{StaticResource RaisedBackground}" CornerRadius="10" Padding="12,8" Margin="0,0,0,6">
+                  <Grid ColumnDefinitions="*,Auto">
+                    <StackPanel>
+                      <TextBlock Text="{Binding Label}" FontWeight="SemiBold" />
+                      <TextBlock Classes="muted" FontSize="11" Text="{Binding Detail}" />
+                    </StackPanel>
+                    <TextBlock Grid.Column="1" Text="{Binding SizeText}" FontWeight="SemiBold" VerticalAlignment="Center" />
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+
+          <TextBlock Text="{Binding Backup.TotalText}" FontWeight="SemiBold" FontSize="15" />
+          <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap"
+                     Text="Backups are for your own PCs, so they include the game data made from your ROM. To give a game to someone else, use Share game instead." />
+
+          <StackPanel IsVisible="{Binding Backup.IsWorking}" Spacing="6" Margin="0,6,0,0">
+            <ProgressBar Minimum="0" Maximum="100" Value="{Binding Backup.Progress}" />
+            <TextBlock Classes="muted" FontSize="12" Text="{Binding Backup.ProgressText}" />
+          </StackPanel>
+
+          <Border IsVisible="{Binding Backup.HasError}" Background="{StaticResource ErrorBackground}"
+                  CornerRadius="8" Padding="10,8" Margin="0,6,0,0">
+            <TextBlock Text="{Binding Backup.Error}" Foreground="{StaticResource ErrorText}" FontSize="12" TextWrapping="Wrap" />
+          </Border>
+
+          <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <Button Content="{Binding Backup.CancelLabel}" Command="{Binding Backup.CancelCommand}" />
+            <Button Classes="primary" Content="Save backup…" Command="{Binding Backup.SaveCommand}"
+                    IsEnabled="{Binding Backup.CanSave}" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+    </Grid>
+
+    <!-- Uninstall a game, optionally backing it up first -->
+    <Grid Grid.Row="1" Grid.RowSpan="3" IsVisible="{Binding Uninstall.IsOpen}" Background="#B3080A0D">
+      <Border Background="{StaticResource CardBackground}" BorderBrush="{StaticResource CardBorder}"
+              BorderThickness="1" CornerRadius="14" Padding="24,20,24,24" Margin="24"
+              MaxWidth="540" HorizontalAlignment="Stretch" VerticalAlignment="Center">
+        <StackPanel Spacing="8">
+          <TextBlock Classes="title" Text="{Binding Uninstall.Title}" FontSize="22" TextWrapping="Wrap" />
+          <TextBlock Text="{Binding Uninstall.WhatGetsDeleted}" TextWrapping="Wrap" />
+
+          <Border Background="{StaticResource RaisedBackground}" CornerRadius="10" Padding="12,10" Margin="0,4,0,0">
+            <CheckBox IsChecked="{Binding Uninstall.BackUpFirst}" IsEnabled="{Binding Uninstall.CanEdit}">
+              <StackPanel Margin="4,0,0,0" Spacing="2">
+                <TextBlock Text="{Binding Uninstall.BackupOptionText}" FontWeight="SemiBold" />
+                <TextBlock Classes="muted" FontSize="12" Text="{Binding Uninstall.BackupOptionDetail}" TextWrapping="Wrap" />
+              </StackPanel>
+            </CheckBox>
+          </Border>
+
+          <TextBlock FontSize="12" Foreground="{StaticResource ErrorText}" TextWrapping="Wrap"
+                     Text="{Binding Uninstall.NoBackupWarning}" IsVisible="{Binding Uninstall.ShowNoBackupWarning}" />
+          <TextBlock Classes="muted" FontSize="12" Text="{Binding Uninstall.ArtworkNote}" TextWrapping="Wrap" />
+
+          <StackPanel IsVisible="{Binding Uninstall.IsWorking}" Spacing="6" Margin="0,4,0,0">
+            <ProgressBar Minimum="0" Maximum="100" Value="{Binding Uninstall.Progress}"
+                         IsIndeterminate="{Binding Uninstall.IsIndeterminate}" />
+            <TextBlock Classes="muted" FontSize="12" Text="{Binding Uninstall.BusyText}" />
+          </StackPanel>
+
+          <Border IsVisible="{Binding Uninstall.HasError}" Background="{StaticResource ErrorBackground}"
+                  CornerRadius="8" Padding="10,8">
+            <TextBlock Text="{Binding Uninstall.Error}" Foreground="{StaticResource ErrorText}" FontSize="12" TextWrapping="Wrap" />
+          </Border>
+
+          <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <Button Content="{Binding Uninstall.CancelLabel}" Command="{Binding Uninstall.CancelCommand}" />
+            <Button Classes="primary" Content="{Binding Uninstall.ConfirmLabel}" Command="{Binding Uninstall.ConfirmCommand}"
+                    IsVisible="{Binding Uninstall.ShowBackupButton}" IsEnabled="{Binding Uninstall.CanEdit}" />
+            <Button Classes="danger" Content="{Binding Uninstall.ConfirmLabel}" Command="{Binding Uninstall.ConfirmCommand}"
+                    IsVisible="{Binding Uninstall.ShowDangerButton}" IsEnabled="{Binding Uninstall.CanEdit}" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+    </Grid>
+
+    <!-- Restore a .marinabackup -->
+    <Grid Grid.Row="1" Grid.RowSpan="3" IsVisible="{Binding Restore.IsOpen}" Background="#B3080A0D">
+      <Border Background="{StaticResource CardBackground}" BorderBrush="{StaticResource CardBorder}"
+              BorderThickness="1" CornerRadius="14" Padding="24,20,24,24" Margin="24"
+              MaxWidth="560" HorizontalAlignment="Stretch" VerticalAlignment="Center">
+        <StackPanel Spacing="6">
+          <TextBlock Classes="title" Text="{Binding Restore.Title}" FontSize="22" TextWrapping="Wrap" />
+          <Border Background="{StaticResource RaisedBackground}" CornerRadius="10" Padding="14,12" Margin="0,8,0,0">
+            <StackPanel Spacing="8">
+              <TextBlock Text="{Binding Restore.DetailsText}" TextWrapping="Wrap" />
+              <TextBlock Classes="muted" FontSize="12" Text="{Binding Restore.WhatHappensText}" TextWrapping="Wrap" />
+              <TextBlock FontSize="12" Foreground="{StaticResource AccentBrush}" Text="{Binding Restore.TrustText}" TextWrapping="Wrap" />
+            </StackPanel>
+          </Border>
+
+          <StackPanel IsVisible="{Binding Restore.IsWorking}" Spacing="6" Margin="0,6,0,0">
+            <ProgressBar Minimum="0" Maximum="100" Value="{Binding Restore.Progress}" />
+            <TextBlock Classes="muted" FontSize="12" Text="{Binding Restore.ProgressText}" />
+          </StackPanel>
+
+          <Border IsVisible="{Binding Restore.HasError}" Background="{StaticResource ErrorBackground}"
+                  CornerRadius="8" Padding="10,8" Margin="0,6,0,0">
+            <TextBlock Text="{Binding Restore.Error}" Foreground="{StaticResource ErrorText}" FontSize="12" TextWrapping="Wrap" />
+          </Border>
+
+          <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <Button Content="{Binding Restore.CancelLabel}" Command="{Binding Restore.CancelCommand}" />
+            <Button Classes="primary" Content="Restore" Command="{Binding Restore.RestoreCommand}"
+                    IsEnabled="{Binding Restore.CanRestore}" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+    </Grid>
+
+    <!-- Import a shared game (.marinapack) -->
+    <Grid Grid.Row="1" Grid.RowSpan="3" IsVisible="{Binding Import.IsOpen}" Background="#B3080A0D">
+      <Border Background="{StaticResource CardBackground}" BorderBrush="{StaticResource CardBorder}"
+              BorderThickness="1" CornerRadius="14" Padding="24,20,24,24" Margin="24"
+              MaxWidth="560" HorizontalAlignment="Stretch" VerticalAlignment="Center">
+        <StackPanel Spacing="6">
+          <TextBlock Classes="title" Text="{Binding Import.Title}" FontSize="22" TextWrapping="Wrap" />
+          <TextBlock Classes="muted" FontSize="12" Text="{Binding Import.GameLine}" TextTrimming="CharacterEllipsis" />
+
+          <Border Background="{StaticResource RaisedBackground}" CornerRadius="10" Padding="14,12" Margin="0,8,0,0">
+            <StackPanel Spacing="8">
+              <TextBlock Text="{Binding Import.ContentsText}" TextWrapping="Wrap" />
+              <TextBlock Classes="muted" FontSize="12" Text="{Binding Import.WhatHappensText}" TextWrapping="Wrap" />
+              <TextBlock FontSize="12" Foreground="{StaticResource AccentBrush}" TextWrapping="Wrap"
+                         Text="{Binding Import.TrustText}" IsVisible="{Binding Import.ShowTrustWarning}" />
+              <TextBlock Classes="muted" FontSize="12" Text="{Binding Import.RomText}" TextWrapping="Wrap" />
+            </StackPanel>
+          </Border>
+
+          <StackPanel IsVisible="{Binding Import.IsWorking}" Spacing="6" Margin="0,8,0,0">
+            <ProgressBar Minimum="0" Maximum="100" Value="{Binding Import.Progress}"
+                         IsIndeterminate="{Binding Import.IsIndeterminate}" />
+            <TextBlock Classes="muted" FontSize="12" Text="{Binding Import.BusyText}" />
+          </StackPanel>
+
+          <Border IsVisible="{Binding Import.HasError}" Background="{StaticResource ErrorBackground}"
+                  CornerRadius="8" Padding="10,8" Margin="0,8,0,0">
+            <TextBlock Text="{Binding Import.Error}" Foreground="{StaticResource ErrorText}"
+                       FontSize="12" TextWrapping="Wrap" />
+          </Border>
+
+          <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="0,14,0,0">
+            <Button Content="Cancel" Command="{Binding Import.CancelCommand}" IsEnabled="{Binding Import.CanAct}" />
+            <Button Classes="primary" Content="Import" Command="{Binding Import.ImportCommand}"
+                    IsEnabled="{Binding Import.CanAct}" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+    </Grid>
+  </Grid>
+</Window>

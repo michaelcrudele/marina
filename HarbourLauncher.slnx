@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/HarbourLauncher.Cli/HarbourLauncher.Cli.csproj" />
+    <Project Path="src/HarbourLauncher.Core/HarbourLauncher.Core.csproj" />
+    <Project Path="src/HarbourLauncher.Desktop/HarbourLauncher.Desktop.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/HarbourLauncher.Core.Tests/HarbourLauncher.Core.Tests.csproj" />
+  </Folder>
+</Solution>

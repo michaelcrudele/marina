@@ -1,0 +1,65 @@
+{
+  "ports": [
+    {
+      "id": "soh",
+      "name": "Ship of Harkinian",
+      "game": "The Legend of Zelda: Ocarina of Time",
+      "repo": "HarbourMasters/Shipwright",
+      "windowsAsset": "SoH-*-Win64.zip",
+      "exe": "soh.exe",
+      "skip": ["debug/"]
+    },
+    {
+      "id": "2ship",
+      "name": "2 Ship 2 Harkinian",
+      "game": "The Legend of Zelda: Majora's Mask",
+      "repo": "2ship2harkinian/2ship2harkinian",
+      "windowsAsset": "2Ship-*-Win64.zip",
+      "exe": "2ship.exe",
+      "skip": ["debug/"]
+    },
+    {
+      "id": "starship",
+      "name": "Starship",
+      "game": "Star Fox 64",
+      "repo": "HarbourMasters/Starship",
+      "windowsAsset": "Starship-*-Windows.zip",
+      "exe": "Starship.exe"
+    },
+    {
+      "id": "spaghettikart",
+      "name": "SpaghettiKart",
+      "game": "Mario Kart 64",
+      "repo": "HarbourMasters/SpaghettiKart",
+      "windowsAsset": "spaghetti-windows.zip",
+      "exe": "Spaghettify.exe"
+    },
+    {
+      "id": "ghostship",
+      "name": "Ghostship",
+      "game": "Super Mario 64",
+      "repo": "HarbourMasters/Ghostship",
+      "windowsAsset": "*-Win64.zip",
+      "exe": "Ghostship.exe",
+      "skip": ["debug/"]
+    },
+    {
+      "id": "lighthouse",
+      "name": "Lighthouse",
+      "game": "Banjo-Kazooie",
+      "repo": "HarbourMasters/Lighthouse",
+      "windowsAsset": "Lighthouse-*-Win64.zip",
+      "exe": "lighthouse.exe",
+      "skip": ["debug/"]
+    },
+    {
+      "id": "paperboat",
+      "name": "PaperBoat",
+      "game": "Paper Mario",
+      "repo": "HarbourMasters/PaperBoat",
+      "windowsAsset": "Paperboat-*-Win64.zip",
+      "exe": "paperboat.exe",
+      "skip": ["debug/"]
+    }
+  ]
+}

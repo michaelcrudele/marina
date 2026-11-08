@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <AssemblyName>Marina</AssemblyName>
+    <RootNamespace>HarbourLauncher.Desktop</RootNamespace>
+    <!-- The icon Marina.exe shows in File Explorer and when pinned to the taskbar. -->
+    <ApplicationIcon>Assets\marina.ico</ApplicationIcon>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <!-- Keep NuGet advisories and version-resolution notes visible as warnings
+         instead of failing the build (Directory.Build.props treats warnings as errors). -->
+    <WarningsNotAsErrors>$(WarningsNotAsErrors);NU1603;NU1901;NU1902;NU1903;NU1904</WarningsNotAsErrors>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.3.6" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.3.6" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.6" />
+    <!-- Avalonia pulls in Tmds.DBus.Protocol 0.21.2 (used only for Linux desktop integration),
+         which has advisory GHSA-xrw6-gwf8-vvr9. 0.21.3 is the patched release of the same line;
+         referencing it directly makes the build use it instead. Remove once Avalonia ships it. -->
+    <PackageReference Include="Tmds.DBus.Protocol" Version="0.21.3" />
+  </ItemGroup>
+  <ItemGroup>
+    <AvaloniaResource Include="Assets\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\HarbourLauncher.Core\HarbourLauncher.Core.csproj" />
+  </ItemGroup>
+</Project>

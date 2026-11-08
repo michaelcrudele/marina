@@ -1,0 +1,22 @@
+# Build output
+bin/
+obj/
+publish/
+TestResults/
+
+# Editor and IDE files
+.vs/
+.vscode/
+*.user
+*.suo
+
+# Local scratch, not part of the project
+Claude outputs/
+
+# OS clutter
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Logs
+*.log

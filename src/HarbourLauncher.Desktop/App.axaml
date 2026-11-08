@@ -1,0 +1,185 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="HarbourLauncher.Desktop.App"
+             RequestedThemeVariant="Dark">
+
+  <Application.Resources>
+    <!-- Colours and fonts follow shipofharkinian.com (HarbourMasters' site, src/styles/globals.css).
+         Values marked "derived" aren't on the site; they're picked to sit alongside its palette. -->
+    <SolidColorBrush x:Key="WindowBackground" Color="#0E1318" />      <!-- site: backgroundColor -->
+    <SolidColorBrush x:Key="CardBackground" Color="#171E27" />        <!-- site: backgroundAccent -->
+    <SolidColorBrush x:Key="RaisedBackground" Color="#1E2732" />      <!-- site: backgroundLightAccent -->
+    <SolidColorBrush x:Key="SunkenBackground" Color="#0D1014" />      <!-- site: backgroundDarkAccent -->
+    <SolidColorBrush x:Key="CardBorder" Color="#243040" />            <!-- derived -->
+    <SolidColorBrush x:Key="CardBorderHover" Color="#3A4B60" />       <!-- derived -->
+    <SolidColorBrush x:Key="TextPrimary" Color="#DADADA" />           <!-- site: textColor -->
+    <SolidColorBrush x:Key="TextMuted" Color="#8E9AA8" />             <!-- derived -->
+    <SolidColorBrush x:Key="AccentBrush" Color="#EB802B" />           <!-- site: mainOrange -->
+    <SolidColorBrush x:Key="AccentHover" Color="#F2954B" />           <!-- derived -->
+    <SolidColorBrush x:Key="AccentPressed" Color="#CC6A1C" />         <!-- derived -->
+    <SolidColorBrush x:Key="OnAccent" Color="#1B1206" />              <!-- dark text: white on this orange is hard to read -->
+    <SolidColorBrush x:Key="UpdateBrush" Color="#5FA4FF" />           <!-- site: linkColor -->
+    <SolidColorBrush x:Key="UpdateHover" Color="#7DB6FF" />           <!-- derived -->
+    <SolidColorBrush x:Key="UpdatePressed" Color="#4A8CE6" />         <!-- derived -->
+    <SolidColorBrush x:Key="OnUpdate" Color="#06182F" />
+    <SolidColorBrush x:Key="SuccessBrush" Color="#3FB950" />
+    <SolidColorBrush x:Key="ErrorBackground" Color="#3A1D1F" />
+    <SolidColorBrush x:Key="ErrorText" Color="#FFB4AE" />
+    <SolidColorBrush x:Key="NoticeBackground" Color="#2B2015" />
+    <SolidColorBrush x:Key="DangerBrush" Color="#D9483B" />
+    <SolidColorBrush x:Key="DangerHover" Color="#E8604F" />
+    <SolidColorBrush x:Key="DangerPressed" Color="#B83A2F" />
+
+    <!-- The site's fonts: Righteous for titles, Open Sans for everything else (both SIL OFL, see Assets/Fonts). -->
+    <FontFamily x:Key="TitleFont">avares://Marina/Assets/Fonts#Righteous</FontFamily>
+    <FontFamily x:Key="BodyFont">avares://Marina/Assets/Fonts#Open Sans</FontFamily>
+  </Application.Resources>
+
+  <Application.Styles>
+    <FluentTheme>
+      <FluentTheme.Palettes>
+        <ColorPaletteResources x:Key="Dark" Accent="#FFEB802B" />
+      </FluentTheme.Palettes>
+    </FluentTheme>
+
+    <!-- Like the site's h1: Righteous, orange, upper case. -->
+    <Style Selector="TextBlock.title">
+      <Setter Property="FontFamily" Value="{StaticResource TitleFont}" />
+      <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+    </Style>
+    <Style Selector="TextBlock.muted">
+      <Setter Property="Foreground" Value="{StaticResource TextMuted}" />
+    </Style>
+    <Style Selector="TextBlock.section">
+      <Setter Property="FontSize" Value="13" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Foreground" Value="{StaticResource TextMuted}" />
+      <Setter Property="Margin" Value="0,16,0,4" />
+    </Style>
+
+    <!-- Game cards -->
+    <!-- On hover the whole card grows (artwork and all, nothing inside is zoomed
+         or cropped), gets a deeper shadow and an orange outline, and is drawn
+         above its neighbours so the larger card is never cut off by them. -->
+    <Style Selector="Border.card">
+      <Setter Property="Background" Value="{StaticResource CardBackground}" />
+      <Setter Property="BorderBrush" Value="{StaticResource CardBorder}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="12" />
+      <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+      <Setter Property="RenderTransform" Value="scale(1)" />
+      <Setter Property="BoxShadow" Value="0 2 8 0 #33000000" />
+      <Setter Property="Transitions">
+        <Transitions>
+          <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.18" Easing="CubicEaseOut" />
+          <BoxShadowsTransition Property="BoxShadow" Duration="0:0:0.18" Easing="CubicEaseOut" />
+          <BrushTransition Property="BorderBrush" Duration="0:0:0.18" />
+        </Transitions>
+      </Setter>
+    </Style>
+    <Style Selector="Border.card:pointerover">
+      <Setter Property="RenderTransform" Value="scale(1.08)" />
+      <Setter Property="BoxShadow" Value="0 12 24 0 #B3000000" />
+      <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+    </Style>
+    <!-- The game grid must not clip a growing card at its own edges: by default the
+         list cuts off anything drawn outside its bounds, which chopped the top and
+         left of the hovered card. Each layer of the list is told not to clip. -->
+    <Style Selector="ItemsControl.games">
+      <Setter Property="ClipToBounds" Value="False" />
+    </Style>
+    <Style Selector="ItemsControl.games /template/ Border">
+      <Setter Property="ClipToBounds" Value="False" />
+    </Style>
+    <Style Selector="ItemsControl.games ItemsPresenter">
+      <Setter Property="ClipToBounds" Value="False" />
+    </Style>
+    <Style Selector="ItemsControl.games WrapPanel">
+      <Setter Property="ClipToBounds" Value="False" />
+    </Style>
+    <!-- The hovered card's slot is drawn last, so it sits on top of the cards around it. -->
+    <Style Selector="ItemsControl.games ContentPresenter:pointerover">
+      <Setter Property="ZIndex" Value="1" />
+    </Style>
+    <!-- Inner layer that rounds off the artwork; kept separate so it doesn't clip the card's shadow. -->
+    <Style Selector="Border.cardClip">
+      <Setter Property="CornerRadius" Value="11" />
+      <Setter Property="ClipToBounds" Value="True" />
+    </Style>
+
+    <Style Selector="Border.pill">
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="Padding" Value="9,3" />
+      <Setter Property="Background" Value="#D90E1318" />
+    </Style>
+
+    <!-- Buttons -->
+    <Style Selector="Button">
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="Padding" Value="14,8" />
+    </Style>
+
+    <Style Selector="Button.primary">
+      <Setter Property="Background" Value="{StaticResource AccentBrush}" />
+      <Setter Property="Foreground" Value="{StaticResource OnAccent}" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Padding" Value="22,8" />
+    </Style>
+    <Style Selector="Button.primary:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource AccentHover}" />
+      <Setter Property="Foreground" Value="{StaticResource OnAccent}" />
+    </Style>
+    <Style Selector="Button.primary:pressed /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource AccentPressed}" />
+      <Setter Property="Foreground" Value="{StaticResource OnAccent}" />
+    </Style>
+
+    <Style Selector="Button.update">
+      <Setter Property="Background" Value="{StaticResource UpdateBrush}" />
+      <Setter Property="Foreground" Value="{StaticResource OnUpdate}" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="Button.update:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource UpdateHover}" />
+      <Setter Property="Foreground" Value="{StaticResource OnUpdate}" />
+    </Style>
+    <Style Selector="Button.update:pressed /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource UpdatePressed}" />
+      <Setter Property="Foreground" Value="{StaticResource OnUpdate}" />
+    </Style>
+
+    <!-- Smaller buttons for the portrait game cards. -->
+    <Style Selector="Button.compact">
+      <Setter Property="Padding" Value="12,6" />
+    </Style>
+
+    <!-- For actions that delete things. -->
+    <Style Selector="Button.danger">
+      <Setter Property="Background" Value="{StaticResource DangerBrush}" />
+      <Setter Property="Foreground" Value="White" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Padding" Value="22,8" />
+    </Style>
+    <Style Selector="Button.danger:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource DangerHover}" />
+      <Setter Property="Foreground" Value="White" />
+    </Style>
+    <Style Selector="Button.danger:pressed /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource DangerPressed}" />
+      <Setter Property="Foreground" Value="White" />
+    </Style>
+    <Style Selector="MenuItem.danger">
+      <Setter Property="Foreground" Value="{StaticResource ErrorText}" />
+    </Style>
+
+    <Style Selector="Button.subtle">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Padding" Value="10,8" />
+    </Style>
+
+    <Style Selector="ProgressBar">
+      <Setter Property="MinHeight" Value="6" />
+      <Setter Property="CornerRadius" Value="3" />
+    </Style>
+  </Application.Styles>
+</Application>

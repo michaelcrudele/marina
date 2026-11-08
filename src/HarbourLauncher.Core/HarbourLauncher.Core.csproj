@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <InternalsVisibleTo Include="HarbourLauncher.Core.Tests" />
+    <EmbeddedResource Include="Catalog\ports.json" LogicalName="ports.json" />
+  </ItemGroup>
+</Project>
