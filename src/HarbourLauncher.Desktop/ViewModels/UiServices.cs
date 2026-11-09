@@ -24,6 +24,9 @@ public sealed class UiServices
     /// <summary>Opens the "uninstall game" dialog for this game.</summary>
     public Action<GameViewModel>? OpenUninstall { get; set; }
 
+    /// <summary>Opens the "save profiles" dialog for this game.</summary>
+    public Action<GameViewModel>? OpenSaveProfiles { get; set; }
+
     /// <summary>Opens the "share game" dialog for this game.</summary>
     public Action<GameViewModel>? OpenShare { get; set; }
 

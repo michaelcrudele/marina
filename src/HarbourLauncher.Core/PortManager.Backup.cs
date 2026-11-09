@@ -3,6 +3,7 @@ using HarbourLauncher.Core.Backup;
 using HarbourLauncher.Core.Catalog;
 using HarbourLauncher.Core.Install;
 using HarbourLauncher.Core.Launch;
+using HarbourLauncher.Core.Saves;
 using HarbourLauncher.Core.Sharing;
 
 namespace HarbourLauncher.Core;
@@ -30,6 +31,7 @@ public sealed partial class PortManager
 
         string PartOf(string rel)
         {
+            if (rel.StartsWith(SaveProfiles.StoreFolder + "/", StringComparison.OrdinalIgnoreCase)) return "Saves and settings";
             if (release.Contains(rel) || rel.StartsWith(".marina/", StringComparison.OrdinalIgnoreCase)
                 || rel.StartsWith(".harbourlauncher/", StringComparison.OrdinalIgnoreCase)) return "The game";
             if (ShareRules.NeverSharedReason(rel, release) is "made from your ROM" or "ROM") return "Game data made from your ROM";

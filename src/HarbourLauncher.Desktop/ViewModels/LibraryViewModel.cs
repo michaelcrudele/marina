@@ -31,6 +31,8 @@ public sealed class LibraryViewModel : ObservableObject
         Ui.OpenBackup = Backup.Open;
         Uninstall = new UninstallViewModel(manager, Ui, OnGameUninstalled);
         Ui.OpenUninstall = Uninstall.Open;
+        SaveProfiles = new SaveProfilesViewModel(manager, Ui);
+        Ui.OpenSaveProfiles = SaveProfiles.Open;
         Restore = new RestoreViewModel(manager, Ui, id => games.Any(g => g.Port.Id == id && g.IsBusy), OnGamesAddedAsync);
         OpenSettingsCommand = new RelayCommand(Settings.Open);
         AppUpdate = new AppUpdateViewModel(updater, Ui, () => IsAnyBusy);
@@ -60,6 +62,7 @@ public sealed class LibraryViewModel : ObservableObject
     public BackupViewModel Backup { get; }
     public RestoreViewModel Restore { get; }
     public UninstallViewModel Uninstall { get; }
+    public SaveProfilesViewModel SaveProfiles { get; }
     public AppUpdateViewModel AppUpdate { get; }
     public ICommand ImportCommand { get; }
 

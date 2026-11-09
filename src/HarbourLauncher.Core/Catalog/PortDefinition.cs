@@ -37,4 +37,11 @@ public sealed record PortDefinition
 
     /// <summary>Folder the port loads mods from, relative to the install folder.</summary>
     public string ModsFolder { get; init; } = "mods";
+
+    /// <summary>
+    /// Top-level files or folders in the install folder that hold the player's saves.
+    /// Switching save profiles swaps exactly these. Matched ignoring case, so the
+    /// default covers "Save", "save", "Saves" and "saves". Settings are not included.
+    /// </summary>
+    public IReadOnlyList<string> Saves { get; init; } = ["Save", "Saves"];
 }

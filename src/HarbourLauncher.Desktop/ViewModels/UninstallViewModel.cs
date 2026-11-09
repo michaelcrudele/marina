@@ -72,7 +72,7 @@ public sealed class UninstallViewModel : ObservableObject
     public string WhatGetsDeleted => game is null ? "" :
         $"This deletes {manager.InstallFolder(game.Port)} and everything in it" +
         (folderBytes < 0 ? "" : $" ({ShareViewModel.FormatSize(folderBytes)})") +
-        ": the game, your saves and settings, mods, and the game data made from your ROM.";
+        ": the game, your saves (every save profile) and settings, mods, and the game data made from your ROM.";
 
     public string BackupOptionText => backupBytes < 0
         ? "Back up first (measuring…)"

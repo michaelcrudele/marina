@@ -28,6 +28,7 @@ public sealed class GameViewModel : ObservableObject
     private Bitmap? artwork;
     private bool cropped;
     private DateTimeOffset? lastPlayed;
+    private string? saveProfileText;
 
     public GameViewModel(PortManager manager, PortDefinition port, UiServices ui, Action<GameViewModel> changed)
     {
@@ -43,6 +44,7 @@ public sealed class GameViewModel : ObservableObject
         InstallCommand = new RelayCommand(InstallAsync);
         OpenFolderCommand = new RelayCommand(OpenFolder);
         AddModCommand = new RelayCommand(AddModAsync);
+        SaveProfilesCommand = new RelayCommand(() => ui.OpenSaveProfiles?.Invoke(this));
         DismissErrorCommand = new RelayCommand(() => Error = null);
         ChooseArtworkCommand = new RelayCommand(ChooseArtworkAsync);
         RemoveArtworkCommand = new RelayCommand(RemoveArtwork);
@@ -52,6 +54,7 @@ public sealed class GameViewModel : ObservableObject
         BackupCommand = new RelayCommand(() => ui.OpenBackup?.Invoke(this));
         UninstallCommand = new RelayCommand(() => ui.OpenUninstall?.Invoke(this));
         LoadArtwork();
+        RefreshSaveProfile();
     }
 
     public PortDefinition Port { get; }
@@ -74,6 +77,7 @@ public sealed class GameViewModel : ObservableObject
     public ICommand InstallCommand { get; }
     public ICommand OpenFolderCommand { get; }
     public ICommand AddModCommand { get; }
+    public ICommand SaveProfilesCommand { get; }
     public ICommand DismissErrorCommand { get; }
     public ICommand ChooseArtworkCommand { get; }
     public ICommand RemoveArtworkCommand { get; }
@@ -147,6 +151,29 @@ public sealed class GameViewModel : ObservableObject
     {
         lastPlayed = IsInstalled ? manager.GetLastPlayed(Port) : null;
         Raise(nameof(LastPlayedText));
+    }
+
+    /// <summary>"Profile: Randomizer" once the game has more than one save profile; otherwise null.</summary>
+    public string? SaveProfileText => saveProfileText;
+    public bool HasSaveProfileText => saveProfileText is not null;
+
+    /// <summary>Re-reads which save profile is active, e.g. after the save profiles dialog changed it.</summary>
+    public void RefreshSaveProfile()
+    {
+        saveProfileText = null;
+        if (IsInstalled)
+        {
+            try
+            {
+                var profiles = HarbourLauncher.Core.Saves.SaveProfiles.Load(manager.InstallFolder(Port));
+                if (profiles.Profiles.Count > 1) saveProfileText = $"Profile: {profiles.Active.Name}";
+            }
+            catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+            {
+                // Just don't show it.
+            }
+        }
+        Raise(nameof(SaveProfileText), nameof(HasSaveProfileText));
     }
 
     public static string FormatLastPlayed(DateTimeOffset? when, DateTimeOffset now)
@@ -283,6 +310,7 @@ public sealed class GameViewModel : ObservableObject
         RaiseState();
         LoadArtwork();
         RefreshLastPlayed();
+        RefreshSaveProfile();
     }
 
     /// <summary>Looks up the latest release. Never throws; failures show on the card.</summary>

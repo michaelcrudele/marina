@@ -114,6 +114,22 @@ has those extracted (flattened into `mods`) and the `.zip` is deleted; any other
 `.zip` is moved as-is. The folder comes from the port's `modsFolder` in
 `ports.json` (default `mods`).
 
+## Save profiles
+
+Right-click an installed game and choose **Save profiles…** to keep separate
+sets of saves, e.g. a main playthrough, a randomizer and a challenge run. The
+game plays whichever profile is active; the card shows it once there's more than
+one. A new profile starts fresh or as a copy of the active one's saves.
+Settings, controls and mods are shared by every profile.
+
+The games only read saves from one folder, so switching moves the current saves
+into `.marina/profiles/<id>/` and the chosen profile's saves into their place
+(instant: it's a rename on the same drive). Switching is refused while the game
+is running, and a failed switch undoes itself. Profiles live in the game folder,
+so they're in `.marinabackup` files and move with the games folder; a shared
+`.marinapack` holds only the active profile. Which files count as saves comes from
+the port's `saves` list in `ports.json` (default `Save` / `Saves`, ignoring case).
+
 ## Uninstalling
 
 Right-click a game and choose **Uninstall…**. The dialog shows the folder and

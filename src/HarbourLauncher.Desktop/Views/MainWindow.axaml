@@ -36,6 +36,8 @@
             <MenuItem Header="Open install folder" Command="{Binding OpenFolderCommand}" IsVisible="{Binding IsInstalled}" />
             <MenuItem Header="Add mod…" Command="{Binding AddModCommand}" IsVisible="{Binding IsInstalled}"
                       ToolTip.Tip="Choose an .o2r, .otr or .zip mod and move it into the game's mods folder" />
+            <MenuItem Header="Save profiles…" Command="{Binding SaveProfilesCommand}" IsVisible="{Binding IsInstalled}"
+                      ToolTip.Tip="Keep separate sets of saves, e.g. a main playthrough and a randomizer, and switch between them" />
             <MenuItem Header="Back up…" Command="{Binding BackupCommand}" IsVisible="{Binding IsInstalled}"
                       ToolTip.Tip="Save the whole game to a .marinabackup file, e.g. on a USB drive, to restore on another of your PCs" />
             <MenuItem Header="Share game…" Command="{Binding ShareCommand}" IsVisible="{Binding IsInstalled}"
@@ -109,6 +111,9 @@
                        TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding VersionText}" />
             <TextBlock Classes="muted" Text="{Binding LastPlayedText}" FontSize="11"
                        TextTrimming="CharacterEllipsis" IsVisible="{Binding IsInstalled}" />
+            <TextBlock Classes="muted" Text="{Binding SaveProfileText}" FontSize="11"
+                       TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding SaveProfileText}"
+                       IsVisible="{Binding HasSaveProfileText}" />
             <TextBlock Classes="muted" Text="{Binding OfflineText}" IsVisible="{Binding HasOfflineText}"
                        FontSize="11" FontStyle="Italic" TextWrapping="Wrap" />
 
@@ -591,6 +596,82 @@
                     IsVisible="{Binding Uninstall.ShowBackupButton}" IsEnabled="{Binding Uninstall.CanEdit}" />
             <Button Classes="danger" Content="{Binding Uninstall.ConfirmLabel}" Command="{Binding Uninstall.ConfirmCommand}"
                     IsVisible="{Binding Uninstall.ShowDangerButton}" IsEnabled="{Binding Uninstall.CanEdit}" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+    </Grid>
+
+    <!-- Save profiles: separate sets of saves for one game -->
+    <Grid Grid.Row="1" Grid.RowSpan="4" IsVisible="{Binding SaveProfiles.IsOpen}" Background="#B3080A0D">
+      <Border Background="{StaticResource CardBackground}" BorderBrush="{StaticResource CardBorder}"
+              BorderThickness="1" CornerRadius="14" Padding="24,20,24,24" Margin="24"
+              MaxWidth="580" HorizontalAlignment="Stretch" VerticalAlignment="Center">
+        <StackPanel Spacing="8">
+          <TextBlock Classes="title" Text="{Binding SaveProfiles.Title}" FontSize="22" TextWrapping="Wrap" />
+          <TextBlock Classes="muted" FontSize="12" Text="{Binding SaveProfiles.Explanation}" TextWrapping="Wrap" />
+
+          <ScrollViewer MaxHeight="300" Margin="0,6,0,0">
+            <ItemsControl ItemsSource="{Binding SaveProfiles.Profiles}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="vm:SaveProfileRowViewModel">
+                  <Border Background="{StaticResource RaisedBackground}" CornerRadius="10" Padding="12,10" Margin="0,0,0,6">
+                    <StackPanel Spacing="6">
+                      <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel Spacing="2" VerticalAlignment="Center">
+                          <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"
+                                     IsVisible="{Binding ShowName}" />
+                          <TextBox Text="{Binding EditName}" MaxLength="{Binding MaxNameLength}" IsVisible="{Binding IsRenaming}" />
+                          <TextBlock Classes="muted" FontSize="12" Text="{Binding Details}" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" Margin="10,0,0,0"
+                                    VerticalAlignment="Center" IsVisible="{Binding ShowButtons}">
+                          <Button Classes="primary compact" Content="Switch to this" Command="{Binding SwitchCommand}"
+                                  IsVisible="{Binding IsInactive}" />
+                          <Button Classes="compact" Content="Rename" Command="{Binding RenameCommand}" />
+                          <Button Classes="danger compact" Content="Delete" Command="{Binding DeleteCommand}"
+                                  IsVisible="{Binding IsInactive}" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" Margin="10,0,0,0"
+                                    VerticalAlignment="Center" IsVisible="{Binding IsRenaming}">
+                          <Button Classes="primary compact" Content="Save" Command="{Binding SaveRenameCommand}" />
+                          <Button Classes="compact" Content="Cancel" Command="{Binding CancelRenameCommand}" />
+                        </StackPanel>
+                      </Grid>
+                      <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding IsConfirmingDelete}">
+                        <TextBlock FontSize="12" Foreground="{StaticResource ErrorText}" TextWrapping="Wrap"
+                                   VerticalAlignment="Center" Text="{Binding DeleteWarning}" />
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" Margin="10,0,0,0">
+                          <Button Classes="danger compact" Content="Delete" Command="{Binding ConfirmDeleteCommand}" />
+                          <Button Classes="compact" Content="Keep it" Command="{Binding CancelDeleteCommand}" />
+                        </StackPanel>
+                      </Grid>
+                    </StackPanel>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </ScrollViewer>
+          <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap" FontStyle="Italic"
+                     Text="{Binding SaveProfiles.SavesHint}" IsVisible="{Binding SaveProfiles.HasSavesHint}" />
+
+          <TextBlock Text="New profile" FontWeight="SemiBold" Margin="0,6,0,0" />
+          <Grid ColumnDefinitions="*,Auto">
+            <TextBox Text="{Binding SaveProfiles.NewName}" MaxLength="{Binding SaveProfiles.MaxNameLength}"
+                     Watermark="e.g. Randomizer, 100% run, No-damage challenge" />
+            <Button Grid.Column="1" Classes="primary" Content="Create" Margin="8,0,0,0"
+                    Command="{Binding SaveProfiles.CreateCommand}" IsEnabled="{Binding SaveProfiles.CanCreate}" />
+          </Grid>
+          <CheckBox IsChecked="{Binding SaveProfiles.CopyCurrent}"
+                    Content="Start from a copy of the active profile's saves (otherwise it starts fresh)" />
+          <CheckBox IsChecked="{Binding SaveProfiles.SwitchToNew}" Content="Switch to it now" />
+
+          <Border IsVisible="{Binding SaveProfiles.HasError}" Background="{StaticResource ErrorBackground}"
+                  CornerRadius="8" Padding="10,8" Margin="0,4,0,0">
+            <TextBlock Text="{Binding SaveProfiles.Error}" Foreground="{StaticResource ErrorText}" FontSize="12" TextWrapping="Wrap" />
+          </Border>
+
+          <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <Button Content="Done" Command="{Binding SaveProfiles.CloseCommand}" />
           </StackPanel>
         </StackPanel>
       </Border>
