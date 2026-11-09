@@ -152,4 +152,55 @@ public static class SettingsTests
         Assert.True(Directory.Exists(Path.Combine(to, "mods")), "empty folder");
         Assert.True(!Directory.Exists(from), "original removed");
     }
+
+    [Test]
+    public static void AccentColorIsSavedAndKeptAlongsideOtherSettings()
+    {
+        using var s = new Sandbox();
+        var manager = s.Manager();
+        Assert.Equal(null, manager.AccentColor, "starts on Marina's orange");
+
+        string games = Path.Combine(s.Dir, "Games");
+        manager.ChangeGamesFolderAsync(games, moveInstalled: false).GetAwaiter().GetResult();
+        manager.SetAccentColor("5fa4ff");
+
+        var reopened = s.Manager();
+        Assert.Equal("#5FA4FF", reopened.AccentColor, "colour after restart");
+        Assert.Equal(games, reopened.GamesFolder, "games folder kept");
+
+        reopened.SetAccentColor(null);
+        Assert.Equal(null, s.Manager().AccentColor, "back to the default");
+        Assert.Equal(games, s.Manager().GamesFolder, "games folder still kept");
+    }
+
+    [Test]
+    public static void AccentColorRejectsNonColours()
+    {
+        using var s = new Sandbox();
+        var manager = s.Manager();
+        manager.SetAccentColor("#123456");
+        Assert.Throws<ArgumentException>(() => manager.SetAccentColor("orange"));
+        Assert.Equal("#123456", manager.AccentColor, "bad colour changes nothing");
+
+        // A hand-edited settings.json with junk in it falls back to the default.
+        string file = Path.Combine(s.Root, "settings.json");
+        File.WriteAllText(file, File.ReadAllText(file).Replace("#123456", "not a colour"));
+        Assert.Equal(null, manager.AccentColor, "junk in the file");
+    }
+
+    [Test]
+    public static void ColoursAreNormalized()
+    {
+        foreach (var (input, expected) in new[]
+                 {
+                     ("#eb802b", "#EB802B"), ("EB802B", "#EB802B"), (" #abc ", "#AABBCC"),
+                     ("#FFEB802B", "#EB802B"),
+                 })
+        {
+            Assert.True(LauncherSettings.TryNormalizeColor(input, out string got), $"'{input}' accepted");
+            Assert.Equal(expected, got, $"'{input}'");
+        }
+        foreach (string? bad in new[] { null, "", "#12345", "#GGGGGG", "red", "#1234567" })
+            Assert.True(!LauncherSettings.TryNormalizeColor(bad, out _), $"'{bad}' rejected");
+    }
 }

@@ -14,6 +14,8 @@
     <SolidColorBrush x:Key="CardBorderHover" Color="#3A4B60" />       <!-- derived -->
     <SolidColorBrush x:Key="TextPrimary" Color="#DADADA" />           <!-- site: textColor -->
     <SolidColorBrush x:Key="TextMuted" Color="#8E9AA8" />             <!-- derived -->
+    <!-- The accent brushes below are Marina's orange; AccentTheme.cs replaces them with the
+         player's colour (Settings > Accent colour), so always use them with DynamicResource. -->
     <SolidColorBrush x:Key="AccentBrush" Color="#EB802B" />           <!-- site: mainOrange -->
     <SolidColorBrush x:Key="AccentHover" Color="#F2954B" />           <!-- derived -->
     <SolidColorBrush x:Key="AccentPressed" Color="#CC6A1C" />         <!-- derived -->
@@ -41,11 +43,13 @@
         <ColorPaletteResources x:Key="Dark" Accent="#FFEB802B" />
       </FluentTheme.Palettes>
     </FluentTheme>
+    <!-- The colour picker in Settings ships its own styles. -->
+    <StyleInclude Source="avares://Avalonia.Controls.ColorPicker/Themes/Fluent/Fluent.xaml" />
 
     <!-- Like the site's h1: Righteous, orange, upper case. -->
     <Style Selector="TextBlock.title">
       <Setter Property="FontFamily" Value="{StaticResource TitleFont}" />
-      <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
     </Style>
     <Style Selector="TextBlock.muted">
       <Setter Property="Foreground" Value="{StaticResource TextMuted}" />
@@ -80,7 +84,7 @@
     <Style Selector="Border.card:pointerover">
       <Setter Property="RenderTransform" Value="scale(1.08)" />
       <Setter Property="BoxShadow" Value="0 12 24 0 #B3000000" />
-      <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
     </Style>
     <!-- The game grid must not clip a growing card at its own edges: by default the
          list cuts off anything drawn outside its bounds, which chopped the top and
@@ -120,18 +124,18 @@
     </Style>
 
     <Style Selector="Button.primary">
-      <Setter Property="Background" Value="{StaticResource AccentBrush}" />
-      <Setter Property="Foreground" Value="{StaticResource OnAccent}" />
+      <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource OnAccent}" />
       <Setter Property="FontWeight" Value="SemiBold" />
       <Setter Property="Padding" Value="22,8" />
     </Style>
     <Style Selector="Button.primary:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-      <Setter Property="Background" Value="{StaticResource AccentHover}" />
-      <Setter Property="Foreground" Value="{StaticResource OnAccent}" />
+      <Setter Property="Background" Value="{DynamicResource AccentHover}" />
+      <Setter Property="Foreground" Value="{DynamicResource OnAccent}" />
     </Style>
     <Style Selector="Button.primary:pressed /template/ ContentPresenter#PART_ContentPresenter">
-      <Setter Property="Background" Value="{StaticResource AccentPressed}" />
-      <Setter Property="Foreground" Value="{StaticResource OnAccent}" />
+      <Setter Property="Background" Value="{DynamicResource AccentPressed}" />
+      <Setter Property="Foreground" Value="{DynamicResource OnAccent}" />
     </Style>
 
     <Style Selector="Button.update">

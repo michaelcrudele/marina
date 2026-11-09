@@ -19,6 +19,28 @@ public sealed record LauncherSettings
     /// <summary>Games whose artwork should fill the card, cropping the edges, even though it isn't portrait.</summary>
     public IReadOnlyList<string> CroppedArtwork { get; init; } = [];
 
+    /// <summary>
+    /// The colour of buttons, titles and highlights, as "#RRGGBB".
+    /// Null means Marina's own orange.
+    /// </summary>
+    public string? AccentColor { get; init; }
+
+    /// <summary>
+    /// Tidies a colour typed or picked by the player into "#RRGGBB" (upper case).
+    /// Accepts "#RGB", "#RRGGBB" and "#AARRGGBB" (alpha is dropped), with or without the "#".
+    /// Returns false for anything else.
+    /// </summary>
+    public static bool TryNormalizeColor(string? text, out string normalized)
+    {
+        normalized = "";
+        string hex = (text ?? "").Trim().TrimStart('#');
+        if (hex.Length == 3) hex = string.Concat(hex.Select(c => new string(c, 2)));
+        else if (hex.Length == 8) hex = hex[2..];
+        if (hex.Length != 6 || !hex.All(Uri.IsHexDigit)) return false;
+        normalized = "#" + hex.ToUpperInvariant();
+        return true;
+    }
+
     /// <summary>Loads settings. A missing or unreadable file gives the defaults.</summary>
     public static LauncherSettings Load(string path)
     {

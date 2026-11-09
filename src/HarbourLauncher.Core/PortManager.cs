@@ -176,6 +176,28 @@ public sealed partial class PortManager(
 
     private LauncherSettings LoadSettings() => LauncherSettings.Load(paths.SettingsFile);
 
+    // ---- Accent colour ----
+
+    /// <summary>The player's accent colour as "#RRGGBB", or null for Marina's own orange.</summary>
+    public string? AccentColor =>
+        LauncherSettings.TryNormalizeColor(LoadSettings().AccentColor, out string color) ? color : null;
+
+    /// <summary>Saves the accent colour. Null goes back to Marina's own orange.</summary>
+    public void SetAccentColor(string? color)
+    {
+        string? value = null;
+        if (color is not null)
+        {
+            if (!LauncherSettings.TryNormalizeColor(color, out string normalized))
+                throw new ArgumentException($"\"{color}\" isn't a colour. Use a hex code like #EB802B.", nameof(color));
+            value = normalized;
+        }
+
+        var settings = LoadSettings();
+        if (settings.AccentColor != value)
+            (settings with { AccentColor = value }).Save(paths.SettingsFile);
+    }
+
     // ---- Custom artwork ----
 
     /// <summary>Image types the launcher accepts for artwork.</summary>

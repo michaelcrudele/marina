@@ -18,6 +18,7 @@ public partial class App : Application
         {
             var (manager, updater) = Services.Create();
             var library = new LibraryViewModel(manager, updater);
+            library.Settings.ApplySavedAccent(); // Before the window shows, so it never flashes orange.
             library.Ui.RestartApp = () => Restart(desktop);
             desktop.MainWindow = new MainWindow { DataContext = library };
             _ = StartAsync(library, desktop.Args ?? []);

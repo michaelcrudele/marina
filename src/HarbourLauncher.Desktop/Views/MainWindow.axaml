@@ -19,6 +19,7 @@
     <StreamGeometry x:Key="PlayIcon">M8,5.14V19.14L19,12.14L8,5.14Z</StreamGeometry>
     <StreamGeometry x:Key="SettingsIcon">M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.21,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.21,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.67 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z</StreamGeometry>
     <StreamGeometry x:Key="ImportIcon">M2,12H4V17H20V12H22V17A2,2 0 0,1 20,19H4A2,2 0 0,1 2,17V12M12,15L17.55,9.54L16.13,8.13L13,11.25V2H11V11.25L7.88,8.13L6.46,9.55L12,15Z</StreamGeometry>
+    <StreamGeometry x:Key="CheckIcon">M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z</StreamGeometry>
     <StreamGeometry x:Key="CloseIcon">M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z</StreamGeometry>
   </Window.Resources>
 
@@ -185,7 +186,7 @@
     </Grid>
 
     <!-- Notice -->
-    <Border Grid.Row="2" IsVisible="{Binding HasNotice}" Background="{StaticResource NoticeBackground}"
+    <Border Grid.Row="2" IsVisible="{Binding HasNotice}" Background="{DynamicResource NoticeBackground}"
             CornerRadius="8" Padding="14,10,6,10" Margin="48,12,48,0">
       <Grid ColumnDefinitions="*,Auto">
         <TextBlock Text="{Binding Notice}" TextWrapping="Wrap" VerticalAlignment="Center" />
@@ -300,6 +301,44 @@
                 <Button Grid.Column="1" Content="{Binding AppUpdate.CheckLabel}" Command="{Binding AppUpdate.CheckCommand}"
                         IsEnabled="{Binding AppUpdate.CanCheck}" VerticalAlignment="Center" />
               </Grid>
+
+              <TextBlock Text="Accent colour" FontWeight="SemiBold" Margin="0,20,0,0" />
+              <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap" Margin="0,0,0,8"
+                         Text="The colour of buttons, titles and highlights. It changes as you pick; Save keeps it and Cancel puts it back." />
+              <ItemsControl ItemsSource="{Binding Settings.Swatches}" IsEnabled="{Binding Settings.CanEdit}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <WrapPanel />
+                  </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate DataType="vm:AccentSwatch">
+                    <Button Command="{Binding PickCommand}" ToolTip.Tip="{Binding Name}"
+                            Background="Transparent" Padding="3" CornerRadius="20" Margin="0,0,6,6">
+                      <Grid Width="32" Height="32">
+                        <Ellipse Stroke="{StaticResource TextPrimary}" StrokeThickness="2" IsVisible="{Binding IsSelected}" />
+                        <Ellipse Fill="{Binding Brush}" Margin="4" />
+                        <PathIcon Data="{StaticResource CheckIcon}" Width="12" Height="12" Foreground="#E60E1318"
+                                  IsVisible="{Binding IsSelected}" />
+                      </Grid>
+                    </Button>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <Grid ColumnDefinitions="Auto,Auto,*,Auto">
+                <TextBlock Text="Any colour:" FontSize="12" VerticalAlignment="Center" Margin="0,0,8,0" />
+                <ColorPicker Grid.Column="1" Color="{Binding Settings.Accent, Mode=TwoWay}"
+                             IsAlphaEnabled="False" IsAlphaVisible="False"
+                             IsEnabled="{Binding Settings.CanEdit}" ToolTip.Tip="Pick any colour, or type a hex code" />
+                <TextBlock Grid.Column="2" Classes="muted" FontSize="12" VerticalAlignment="Center" Margin="10,0"
+                           Text="{Binding Settings.AccentHex}" />
+                <Button Grid.Column="3" Classes="subtle" FontSize="12" Padding="8,4"
+                        Content="Use Marina orange" Command="{Binding Settings.ResetAccentCommand}"
+                        IsVisible="{Binding !Settings.IsDefaultAccent}" IsEnabled="{Binding Settings.CanEdit}" />
+              </Grid>
+              <TextBlock FontSize="12" Foreground="{StaticResource ErrorText}" TextWrapping="Wrap" Margin="0,4,0,0"
+                         IsVisible="{Binding Settings.AccentHardToSee}"
+                         Text="This colour is hard to see on Marina's dark background, so titles and highlights may be hard to read." />
 
               <TextBlock Text="Game artwork" FontWeight="SemiBold" Margin="0,20,0,0" />
               <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap" Margin="0,0,0,8"
@@ -566,7 +605,7 @@
             <StackPanel Spacing="8">
               <TextBlock Text="{Binding Restore.DetailsText}" TextWrapping="Wrap" />
               <TextBlock Classes="muted" FontSize="12" Text="{Binding Restore.WhatHappensText}" TextWrapping="Wrap" />
-              <TextBlock FontSize="12" Foreground="{StaticResource AccentBrush}" Text="{Binding Restore.TrustText}" TextWrapping="Wrap" />
+              <TextBlock FontSize="12" Foreground="{DynamicResource AccentBrush}" Text="{Binding Restore.TrustText}" TextWrapping="Wrap" />
             </StackPanel>
           </Border>
 
@@ -602,7 +641,7 @@
             <StackPanel Spacing="8">
               <TextBlock Text="{Binding Import.ContentsText}" TextWrapping="Wrap" />
               <TextBlock Classes="muted" FontSize="12" Text="{Binding Import.WhatHappensText}" TextWrapping="Wrap" />
-              <TextBlock FontSize="12" Foreground="{StaticResource AccentBrush}" TextWrapping="Wrap"
+              <TextBlock FontSize="12" Foreground="{DynamicResource AccentBrush}" TextWrapping="Wrap"
                          Text="{Binding Import.TrustText}" IsVisible="{Binding Import.ShowTrustWarning}" />
               <TextBlock Classes="muted" FontSize="12" Text="{Binding Import.RomText}" TextWrapping="Wrap" />
             </StackPanel>

@@ -90,6 +90,13 @@ stay where they are. A folder named something other than the port id (say
 unknown until the first update. "Not now" is remembered; **Settings > Look for
 games** (or `marina scan --add`) offers them again.
 
+## Accent colour
+
+Marina's orange can be swapped for any colour in **Settings > Accent colour**:
+pick one of the ready-made colours or use **Any colour** for the full picker (or
+a hex code). The app recolours as you pick; **Save** keeps it, **Cancel** puts it
+back. It's stored as `AccentColor` in `settings.json`.
+
 ## Custom artwork
 
 Each game can show your own icon or box art instead of its colour banner:
