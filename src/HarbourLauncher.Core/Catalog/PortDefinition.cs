@@ -34,4 +34,7 @@ public sealed record PortDefinition
     /// not need to be listed here.
     /// </summary>
     public IReadOnlyList<string> Keep { get; init; } = [];
+
+    /// <summary>Folder the port loads mods from, relative to the install folder.</summary>
+    public string ModsFolder { get; init; } = "mods";
 }

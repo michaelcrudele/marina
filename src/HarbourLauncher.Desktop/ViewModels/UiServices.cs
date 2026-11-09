@@ -6,6 +6,9 @@ public sealed class UiServices
     /// <summary>Shows an image file picker with this title; returns the chosen path, or null.</summary>
     public Func<string, Task<string?>>? PickImageAsync { get; set; }
 
+    /// <summary>Shows a mod file picker (.o2r, .otr, .zip) with this title; returns the chosen paths, empty if cancelled.</summary>
+    public Func<string, Task<IReadOnlyList<string>>>? PickModsAsync { get; set; }
+
     /// <summary>Shows an open picker for .marinapack and .marinabackup files with this title; returns the chosen path, or null.</summary>
     public Func<string, Task<string?>>? PickPackAsync { get; set; }
 

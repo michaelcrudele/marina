@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
+using HarbourLauncher.Core;
 using HarbourLauncher.Desktop.ViewModels;
 
 namespace HarbourLauncher.Desktop.Views;
@@ -32,6 +33,7 @@ public partial class MainWindow : Window
         if (DataContext is LibraryViewModel library)
         {
             library.Ui.PickImageAsync = PickImageAsync;
+            library.Ui.PickModsAsync = PickModsAsync;
             library.Ui.PickPackAsync = PickPackAsync;
             library.Ui.SavePackAsync = SavePackAsync;
             library.Ui.SaveBackupAsync = SaveBackupAsync;
@@ -93,6 +95,20 @@ public partial class MainWindow : Window
             ],
         });
         return files.Count > 0 ? files[0].TryGetLocalPath() : null;
+    }
+
+    private async Task<IReadOnlyList<string>> PickModsAsync(string title)
+    {
+        var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = title,
+            AllowMultiple = true,
+            FileTypeFilter =
+            [
+                new FilePickerFileType("Mods") { Patterns = PortManager.ModFileExtensions.Select(e => "*" + e).ToList() },
+            ],
+        });
+        return files.Select(f => f.TryGetLocalPath()).OfType<string>().ToList();
     }
 
     private async void OnBrowseClick(object? sender, RoutedEventArgs e)

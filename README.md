@@ -105,6 +105,15 @@ Each game can show your own icon or box art instead of its colour banner:
 and WebP work. The image is copied to `%LOCALAPPDATA%\Marina\artwork`,
 so the original can be moved or deleted. The launcher doesn't ship any artwork.
 
+## Adding mods
+
+Right-click an installed game and choose **Add mod…**, then pick one or more
+`.o2r`, `.otr` or `.zip` files. Each one is moved into the game's `mods` folder,
+replacing a mod with the same file name. A `.zip` that holds `.o2r`/`.otr` files
+has those extracted (flattened into `mods`) and the `.zip` is deleted; any other
+`.zip` is moved as-is. The folder comes from the port's `modsFolder` in
+`ports.json` (default `mods`).
+
 ## Uninstalling
 
 Right-click a game and choose **Uninstall…**. The dialog shows the folder and

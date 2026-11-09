@@ -34,6 +34,8 @@
             <MenuItem Header="Show the whole artwork" Command="{Binding ShowWholeArtworkCommand}" IsVisible="{Binding CanShowWholeArtwork}" />
             <MenuItem Header="Remove artwork" Command="{Binding RemoveArtworkCommand}" IsVisible="{Binding HasArtwork}" />
             <MenuItem Header="Open install folder" Command="{Binding OpenFolderCommand}" IsVisible="{Binding IsInstalled}" />
+            <MenuItem Header="Add mod…" Command="{Binding AddModCommand}" IsVisible="{Binding IsInstalled}"
+                      ToolTip.Tip="Choose an .o2r, .otr or .zip mod and move it into the game's mods folder" />
             <MenuItem Header="Back up…" Command="{Binding BackupCommand}" IsVisible="{Binding IsInstalled}"
                       ToolTip.Tip="Save the whole game to a .marinabackup file, e.g. on a USB drive, to restore on another of your PCs" />
             <MenuItem Header="Share game…" Command="{Binding ShareCommand}" IsVisible="{Binding IsInstalled}"

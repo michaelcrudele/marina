@@ -42,6 +42,7 @@ public sealed class GameViewModel : ObservableObject
         PlayCommand = new RelayCommand(Play);
         InstallCommand = new RelayCommand(InstallAsync);
         OpenFolderCommand = new RelayCommand(OpenFolder);
+        AddModCommand = new RelayCommand(AddModAsync);
         DismissErrorCommand = new RelayCommand(() => Error = null);
         ChooseArtworkCommand = new RelayCommand(ChooseArtworkAsync);
         RemoveArtworkCommand = new RelayCommand(RemoveArtwork);
@@ -72,6 +73,7 @@ public sealed class GameViewModel : ObservableObject
     public ICommand PlayCommand { get; }
     public ICommand InstallCommand { get; }
     public ICommand OpenFolderCommand { get; }
+    public ICommand AddModCommand { get; }
     public ICommand DismissErrorCommand { get; }
     public ICommand ChooseArtworkCommand { get; }
     public ICommand RemoveArtworkCommand { get; }
@@ -376,6 +378,44 @@ public sealed class GameViewModel : ObservableObject
         {
             Error = $"Couldn't start {Port.Name}. {e.Message}";
         }
+    }
+
+    private async Task AddModAsync()
+    {
+        if (ui.PickModsAsync is null || IsBusy) return;
+        var files = await ui.PickModsAsync($"Add a mod to {Name}");
+        if (files.Count == 0) return;
+
+        List<string> added = [];
+        List<string> replaced = [];
+        List<string> failed = [];
+        foreach (string file in files)
+        {
+            try
+            {
+                var result = manager.AddMod(Port, file);
+                added.AddRange(result.Added);
+                replaced.AddRange(result.Replaced);
+            }
+            catch (Exception e) when (e is IOException or UnauthorizedAccessException
+                                          or InvalidDataException or InvalidOperationException)
+            {
+                failed.Add($"Couldn't add {Path.GetFileName(file)}. {e.Message}");
+            }
+        }
+
+        Error = failed.Count > 0 ? string.Join(" ", failed) : null;
+        if (added.Count == 0) return;
+
+        string what = added.Count == 1 ? added[0] : $"{added.Count} mods";
+        string note = replaced.Count switch
+        {
+            0 => "",
+            1 when added.Count == 1 => " It replaced the older file of the same name.",
+            1 => $" {replaced[0]} replaced the older file of the same name.",
+            _ => $" {replaced.Count} of them replaced older files of the same name.",
+        };
+        ui.ShowNotice?.Invoke($"Added {what} to {Name}'s mods folder.{note}");
     }
 
     private void OpenFolder()
